@@ -1,0 +1,26 @@
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.git/
+.github/
+.idea/
+.vscode/
+docs/
+*.md
+!README.md
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/isin_learned.csv
+# Backups the universe build writes before overwriting a stock-master file.
+# Local safety copies of a generated file, not source data.
+data/*.csv.bak
+
+.streamlit/secrets.toml

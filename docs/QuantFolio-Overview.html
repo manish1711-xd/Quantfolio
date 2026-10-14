@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>QuantFolio — Technical &amp; Business Overview</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+
+  :root{
+    --ink:#16202b; --mute:#5c6b7a; --line:#d8e0e8; --soft:#f4f7fa;
+    --accent:#0b5fa5; --accent-soft:#e8f1f9;
+    --good:#1a7f4b; --warn:#a8610a; --bad:#b3261e;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    font-family:"Segoe UI",-apple-system,"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink); line-height:1.5; font-size:10.2pt; margin:0;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  h1,h2,h3{ line-height:1.25; margin:0 0 .35em; }
+  h1{ font-size:23pt; letter-spacing:-.5px; }
+  h2{
+    font-size:14pt; margin-top:1.5em; padding-bottom:.28em;
+    border-bottom:2px solid var(--accent); color:var(--accent);
+    page-break-after:avoid;
+  }
+  h3{ font-size:11pt; margin-top:1.15em; page-break-after:avoid; }
+  p{ margin:.45em 0; }
+  ul,ol{ margin:.4em 0; padding-left:1.25em; }
+  li{ margin:.22em 0; }
+  code{
+    font-family:"Cascadia Mono",Consolas,monospace; font-size:.88em;
+    background:var(--soft); padding:.06em .32em; border-radius:3px;
+  }
+  table{ width:100%; border-collapse:collapse; margin:.6em 0 .9em; font-size:9.3pt; }
+  th,td{ border:1px solid var(--line); padding:5px 8px; text-align:left; vertical-align:top; }
+  th{ background:var(--accent-soft); font-weight:600; }
+  tbody tr:nth-child(even){ background:#fbfcfd; }
+  td.num,th.num{ text-align:right; white-space:nowrap; }
+
+  .cover{ page-break-after:always; padding-top:22mm; }
+  .cover .rule{ height:5px; background:var(--accent); width:72px; margin:.9em 0 1.4em; }
+  .sub{ font-size:12.5pt; color:var(--mute); margin-bottom:1.6em; }
+  .meta{ font-size:9.2pt; color:var(--mute); margin-top:2.2em; }
+
+  .kpis{ display:flex; gap:9px; margin:1.2em 0; flex-wrap:wrap; }
+  .kpi{
+    flex:1 1 118px; border:1px solid var(--line); border-top:3px solid var(--accent);
+    border-radius:4px; padding:9px 11px; background:#fff;
+  }
+  .kpi .v{ font-size:16pt; font-weight:700; letter-spacing:-.5px; }
+  .kpi .l{ font-size:8pt; color:var(--mute); text-transform:uppercase; letter-spacing:.5px; }
+
+  .note,.warn,.good{
+    border-left:4px solid var(--accent); background:var(--accent-soft);
+    padding:8px 12px; margin:.75em 0; border-radius:0 4px 4px 0;
+    page-break-inside:avoid;
+  }
+  .warn{ border-color:var(--warn); background:#fdf5ea; }
+  .good{ border-color:var(--good); background:#eaf6ef; }
+  .tag{
+    display:inline-block; font-size:7.6pt; font-weight:700; padding:1px 6px;
+    border-radius:9px; text-transform:uppercase; letter-spacing:.4px; vertical-align:1px;
+  }
+  .t-now{ background:#e5efe9; color:var(--good); }
+  .t-next{ background:#fdf0e0; color:var(--warn); }
+  .t-later{ background:#eef1f4; color:var(--mute); }
+  .avoid{ page-break-inside:avoid; }
+  .brk{ page-break-before:always; }
+  .small{ font-size:8.8pt; color:var(--mute); }
+  footer{ margin-top:2em; border-top:1px solid var(--line); padding-top:.6em; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ COVER ══════════════════════════ -->
+<section class="cover">
+  <div class="small" style="letter-spacing:2px;text-transform:uppercase">Technical &amp; Business Overview</div>
+  <h1>QuantFolio</h1>
+  <div class="rule"></div>
+  <div class="sub">A portfolio risk, performance and attribution platform<br>built for Indian markets first.</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">62,645</div><div class="l">lines of source</div></div>
+    <div class="kpi"><div class="v">4,365</div><div class="l">tests passing</div></div>
+    <div class="kpi"><div class="v">92%</div><div class="l">test coverage</div></div>
+    <div class="kpi"><div class="v">7,773</div><div class="l">instruments</div></div>
+    <div class="kpi"><div class="v">7</div><div class="l">dependencies</div></div>
+  </div>
+
+  <table>
+    <tr><th style="width:32%">Application</th><td>QuantFolio v2.6.0</td></tr>
+    <tr><th>Stack</th><td>Python 3.11+ · Streamlit · pandas / NumPy / SciPy · Plotly · SQLite</td></tr>
+    <tr><th>Coverage</th><td>Full NSE + BSE equity listing, US large caps, global indices</td></tr>
+    <tr><th>Deployment</th><td>Runs locally or in Docker; no server, no database service, no API key</td></tr>
+  </table>
+
+  <div class="note" style="margin-top:1.6em">
+    <strong>What this document is.</strong> Part&nbsp;1 explains what the system does and the
+    finance behind it. Part&nbsp;2 covers the engineering. Part&nbsp;3 is an honest list of what it
+    does <em>not</em> do. Part&nbsp;4 is a prioritised roadmap of what would make it more valuable
+    to you or to a company.
+  </div>
+
+  <div class="meta">
+    Generated 11 September 2026 · market data as of 2 September 2026<br>
+    All figures in this document were measured from the codebase, not estimated.
+  </div>
+</section>
+
+<!-- ══════════════════════════ PART 1 ══════════════════════════ -->
+<h2>1 · What the system does</h2>
+
+<p>QuantFolio turns a list of holdings — typed in, or imported unmodified from a broker CSV —
+into a full analytical picture of a portfolio: what it is worth, what return it earned, how much
+risk it carries, where that risk comes from, and what would happen to it under stress.</p>
+
+<p>It is organised as <strong>16 pages</strong> across four areas:</p>
+
+<table>
+  <thead><tr><th style="width:16%">Area</th><th style="width:26%">Pages</th><th>What they answer</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Portfolio</strong></td><td>Build · Overview · Holdings · Performance · Trades &amp; lots</td>
+        <td>What do I own, what is it worth, what did it actually return, and what are my realised gains?</td></tr>
+    <tr><td><strong>Risk</strong></td><td>Risk analytics · Benchmark · Correlation &amp; factors · Stress testing</td>
+        <td>How much can I lose, how do I compare to an index, what drives my returns, and what happens in a crash?</td></tr>
+    <tr><td><strong>Strategy</strong></td><td>Optimiser · Monte Carlo · Rebalance</td>
+        <td>What mix would have been better, what range of outcomes is plausible, and what trades get me there?</td></tr>
+    <tr><td><strong>Research</strong></td><td>Security deep dive · Watchlist · News &amp; calendar · Export</td>
+        <td>How healthy is this company, what am I tracking, what is happening today, and how do I share it?</td></tr>
+  </tbody>
+</table>
+
+<h3>The features that distinguish it</h3>
+<ul>
+  <li><strong>Search by company name</strong> across the whole Indian market — type <em>Reliance</em>
+      or <em>HDFC Bank</em>, no need to know that the symbol is <code>RELIANCE.NS</code>. Typos are
+      tolerated. Runs offline.</li>
+  <li><strong>Broker CSV import</strong> that works on a Zerodha, Groww or Upstox export
+      <em>unmodified</em> — column names are recognised automatically, and every rejected row is
+      reported rather than silently dropped.</li>
+  <li><strong>Scheduled email tearsheets</strong> — daily, weekly or monthly, delivered by a command
+      your operating system schedules.</li>
+  <li><strong>Watchlist price alerts</strong> that e-mail you once when a level is reached, not once
+      per check.</li>
+  <li><strong>News &amp; economic calendar</strong> — live headlines matched to <em>your</em>
+      holdings, plus the week's high-impact releases.</li>
+  <li><strong>Fundamental quality scores</strong> computed from a company's own financial statements.</li>
+</ul>
+
+<!-- ══════════════════════════ PART 2 ══════════════════════════ -->
+<h2>2 · The finance knowledge used</h2>
+
+<p>This is the substance of the product. Every calculation below is implemented from its
+original definition, with the convention stated in the code and in the interface.</p>
+
+<h3>2.1 Return and performance measurement</h3>
+<table>
+  <thead><tr><th style="width:27%">Concept</th><th>What it measures and why it is here</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Time-weighted return (TWR)</strong></td><td>Return of the <em>strategy</em>, stripping out the effect of deposits and withdrawals. The correct basis for comparing against an index.</td></tr>
+    <tr><td><strong>Money-weighted return (XIRR)</strong></td><td>Return <em>you</em> actually earned, including the timing of your contributions. Solved numerically and verified by checking that the net present value of the cash flows is zero at the answer.</td></tr>
+    <tr><td><strong>Modified Dietz</strong></td><td>A cash-flow-weighted approximation for periods without daily valuations.</td></tr>
+    <tr><td><strong>FIFO tax lots</strong></td><td>Every buy is a lot; every sell consumes the oldest lots first. This produces realised profit and loss, holding periods and an accurate cost basis.</td></tr>
+    <tr><td><strong>Geometric annualisation</strong></td><td>Compounding, not averaging — 252 trading days a year.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.2 Risk measurement</h3>
+<table>
+  <thead><tr><th style="width:27%">Concept</th><th>What it measures and why it is here</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Volatility &amp; downside deviation</strong></td><td>Total variability, and variability of losses only.</td></tr>
+    <tr><td><strong>Value at Risk (Cornish–Fisher)</strong></td><td>Loss threshold at a confidence level, <em>adjusted for skew and fat tails</em>. Real returns are not normally distributed and a normal VaR understates the danger.</td></tr>
+    <tr><td><strong>Conditional VaR</strong></td><td>The average loss <em>given</em> that the VaR threshold was breached — what the bad days actually cost.</td></tr>
+    <tr><td><strong>Kupiec backtest</strong></td><td>A statistical test of whether the VaR model was right, by counting how often it was breached. Rare in retail tools; it is what separates a risk number from a risk <em>model</em>.</td></tr>
+    <tr><td><strong>Maximum drawdown &amp; episodes</strong></td><td>Worst peak-to-trough fall, plus every episode with its depth, length and recovery time.</td></tr>
+    <tr><td><strong>Sharpe · Sortino · Calmar · Omega · Ulcer</strong></td><td>Five risk-adjusted return ratios, each penalising a different definition of risk.</td></tr>
+    <tr><td><strong>Beta, alpha, tracking error, information ratio</strong></td><td>Market sensitivity, skill after adjusting for it, and consistency of the difference.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.3 Attribution — where risk and return come from</h3>
+<table>
+  <thead><tr><th style="width:27%">Concept</th><th>What it measures and why it is here</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Marginal &amp; component risk contribution</strong></td><td>How much of total portfolio volatility each holding is responsible for — which is <em>not</em> the same as its weight. A 5% position can carry 20% of the risk.</td></tr>
+    <tr><td><strong>Herfindahl index &amp; effective number of bets</strong></td><td>Concentration. Twenty holdings can behave like four if they move together.</td></tr>
+    <tr><td><strong>Principal component analysis</strong></td><td>How many independent sources of risk actually exist in the portfolio.</td></tr>
+    <tr><td><strong>Hierarchical clustering</strong></td><td>Groups holdings by how they co-move, revealing hidden concentration that sector labels miss.</td></tr>
+    <tr><td><strong>Fama–French factor regression</strong></td><td>Decomposes returns into market, size, value, profitability and momentum exposures — with <strong>Newey–West standard errors</strong>, because return data is autocorrelated and ordinary errors would overstate significance.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.4 Portfolio construction</h3>
+<table>
+  <thead><tr><th style="width:27%">Concept</th><th>What it measures and why it is here</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Mean–variance optimisation</strong></td><td>Maximum-Sharpe and minimum-variance portfolios, and the efficient frontier, solved by sequential quadratic programming.</td></tr>
+    <tr><td><strong>Covariance shrinkage</strong></td><td>A sample covariance matrix estimated from limited history is unstable; shrinkage pulls it toward a structured target so the optimiser does not act on noise.</td></tr>
+    <tr><td><strong>Risk parity</strong></td><td>Weights that equalise <em>risk</em> contribution rather than capital.</td></tr>
+    <tr><td><strong>Black–Litterman</strong></td><td>Starts from the market's own implied returns (reverse optimisation) and blends in your views with a confidence level. Solves the classic problem that raw mean–variance produces absurd, unstable weights.</td></tr>
+    <tr><td><strong>Monte Carlo simulation</strong></td><td>Thousands of forward paths to show a <em>distribution</em> of outcomes instead of a single projection.</td></tr>
+    <tr><td><strong>Rebalancing trade lists</strong></td><td>The actual buys and sells to reach a target, with drift tolerance bands.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.5 Indian-market specifics</h3>
+<table>
+  <thead><tr><th style="width:27%">Concept</th><th>What it measures and why it is here</th></tr></thead>
+  <tbody>
+    <tr><td><strong>STCG / LTCG capital gains</strong></td><td>Indian equity tax under Sections 111A and 112A, including the <strong>23 July 2024 regime change</strong> (15%→20% short term, 10%→12.5% long term, exemption ₹1L→₹1.25L).</td></tr>
+    <tr><td><strong>Loss set-off &amp; carry-forward</strong></td><td>Sections 70/71/74 — set-off is <em>mandatory in quantum</em> and only elective in ordering, and losses carry forward eight years.</td></tr>
+    <tr><td><strong>Section 112A grandfathering</strong></td><td>The 31 January 2018 cost-basis rule.</td></tr>
+    <tr><td><strong>Tax-loss harvesting</strong></td><td>Which lots to realise, and the tax actually saved — which is often zero, and the tool says so.</td></tr>
+    <tr><td><strong>Exchange conventions</strong></td><td><code>.NS</code> / <code>.BO</code> suffixes, NSE series (EQ/BE/BZ), BSE groups, ISIN (ISO 6166) with check-digit validation.</td></tr>
+  </tbody>
+</table>
+
+<h3>2.6 Derivatives and company analysis</h3>
+<table>
+  <thead><tr><th style="width:27%">Concept</th><th>What it measures and why it is here</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Black–Scholes–Merton</strong></td><td>European option pricing with all five Greeks, and implied volatility solved by root-finding. NSE options <em>are</em> European, so the model is exactly right for this market.</td></tr>
+    <tr><td><strong>Covered calls, protective puts, collars</strong></td><td>Payoff, breakeven, income, and the upside surrendered — always plotted <em>against simply holding the shares</em>.</td></tr>
+    <tr><td><strong>Piotroski F-Score</strong></td><td>Nine-signal test of fundamental strength (Piotroski, 2000).</td></tr>
+    <tr><td><strong>Altman Z-Score</strong></td><td>Distress risk, using the Z″ variant and the emerging-market adjustment where appropriate (Altman 1968, 2005).</td></tr>
+    <tr><td><strong>Beneish M-Score</strong></td><td>Eight-variable screen for aggressive accounting (Beneish, 1999).</td></tr>
+    <tr><td><strong>Sloan accruals ratio</strong></td><td>How much of reported profit is not backed by cash (Sloan, 1996).</td></tr>
+    <tr><td><strong>Technical indicators</strong></td><td>Wilder RSI, MACD, Bollinger bands, 52-week positioning.</td></tr>
+  </tbody>
+</table>
+
+<div class="note avoid">
+  <strong>A principle that runs through all of it.</strong> Where a number cannot be computed
+  honestly, the system says so rather than substituting a plausible value. A missing 52-week range
+  shows as a dash, not 50%. An interest-cover ratio for a company reporting no interest expense is
+  <em>unavailable</em>, not infinite. A Piotroski score built from six of nine available signals is
+  reported as “six of eight passed”, never as a low nine — because counting a missing signal as a
+  failure makes a healthy company look distressed.
+</div>
+
+<!-- ══════════════════════════ PART 3 ══════════════════════════ -->
+<h2 class="brk">3 · The programming knowledge used</h2>
+
+<h3>3.1 Languages, libraries and tools</h3>
+<table>
+  <thead><tr><th style="width:22%">Tool</th><th style="width:20%">Role</th><th>Why this one</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Python 3.11+</strong></td><td>Language</td><td>Modern typing, dataclasses, pattern of the scientific stack.</td></tr>
+    <tr><td><strong>pandas / NumPy</strong></td><td>Data &amp; maths</td><td>Time-series alignment across exchanges and time zones; vectorised computation.</td></tr>
+    <tr><td><strong>SciPy</strong></td><td>Optimisation &amp; statistics</td><td>SLSQP for the optimiser, Brent root-finding for XIRR and implied volatility, chi-square for the VaR backtest, hierarchical clustering.</td></tr>
+    <tr><td><strong>Streamlit</strong></td><td>Web interface</td><td>Full interactive application from pure Python — no JavaScript, no separate front end to maintain.</td></tr>
+    <tr><td><strong>Plotly</strong></td><td>Charts</td><td>61 interactive chart builders on one shared theme.</td></tr>
+    <tr><td><strong>yfinance</strong></td><td>Market data</td><td>Free, broad coverage, and honest about being delayed.</td></tr>
+    <tr><td><strong>SQLite</strong> (standard library)</td><td>Persistence</td><td>One file, no server. Saved portfolios, watchlists, alert rules and schedules.</td></tr>
+    <tr><td><strong>XlsxWriter</strong></td><td>Excel export</td><td>Formatted multi-sheet workbooks with live formulas.</td></tr>
+    <tr><td><strong>pytest · ruff · mypy</strong></td><td>Quality</td><td>Testing, linting/formatting, static type checking.</td></tr>
+    <tr><td><strong>Docker · Make · GitHub Actions</strong></td><td>Delivery</td><td>Reproducible builds, one-command tasks, CI on Linux and Windows.</td></tr>
+  </tbody>
+</table>
+
+<p class="small"><strong>Seven runtime dependencies, deliberately.</strong> Features that would
+normally pull in new libraries were built on the standard library instead: the exchange-file
+downloader and news reader use <code>urllib</code> (no <code>requests</code>), the e-mail sender
+uses <code>smtplib</code>, scheduling uses <code>zoneinfo</code>. Fewer dependencies means fewer
+security advisories, faster installs and less that can break.</p>
+
+<h3>3.2 Software architecture</h3>
+<p>The codebase follows two rules, enforced consistently:</p>
+<div class="good avoid">
+  <strong>1. Computation never imports the user interface. The interface never computes.</strong><br>
+  <span class="small">21 analytics modules contain zero Streamlit imports; the UI contains zero
+  formulas. This is why ~20,000 lines of financial mathematics can be tested in seconds, offline,
+  against hand-computed values — with no browser and no market-data subscription.</span>
+</div>
+<div class="good avoid">
+  <strong>2. Every network call lives in one package.</strong><br>
+  <span class="small">Three modules in <code>src/data/</code> touch the wire — Yahoo prices, the
+  exchange files, the news feeds — and nothing outside it does. Replacing the price provider with a
+  broker feed (Zerodha Kite, Upstox, Interactive Brokers) means rewriting <em>one file</em> against
+  the same signatures: no change to the analytics, the interface, or the tests.</span>
+</div>
+
+<table>
+  <thead><tr><th style="width:26%">Layer</th><th class="num" style="width:12%">Lines</th><th>Responsibility</th></tr></thead>
+  <tbody>
+    <tr><td><code>src/analytics/</code></td><td class="num">19,512</td><td>21 pure modules — all the financial mathematics</td></tr>
+    <tr><td><code>src/ui/</code></td><td class="num">19,533</td><td>Design system, session state, 16 pages</td></tr>
+    <tr><td><code>src/charts/</code></td><td class="num">8,315</td><td>61 Plotly builders on one theme</td></tr>
+    <tr><td><code>src/reporting/</code></td><td class="num">5,718</td><td>Excel, HTML tearsheet, SMTP delivery, scheduling</td></tr>
+    <tr><td><code>src/data/</code></td><td class="num">3,342</td><td>Market data, exchange files, news, SQLite store</td></tr>
+    <tr><td><strong>Tests</strong></td><td class="num">36,068</td><td>36 modules — more test code than application code</td></tr>
+  </tbody>
+</table>
+
+<h3>3.3 Engineering techniques demonstrated</h3>
+<ul>
+  <li><strong>Test-driven correctness through invariants.</strong> Rather than only checking fixed
+      values, the suite asserts mathematical identities that cannot rot: beta of a series against
+      itself is exactly 1.0; component risk contributions sum to portfolio volatility; CVaR ≤ VaR at
+      every confidence level; put–call parity holds to 1×10<sup>-12</sup>; every option Greek matches
+      its numerical derivative.</li>
+  <li><strong>Cross-module agreement.</strong> Two independent implementations must produce the same
+      answer — a one-factor regression beta equals the covariance/variance beta to 1×10<sup>-12</sup>.</li>
+  <li><strong>Headless UI testing.</strong> All 16 pages are rendered and asserted in CI with a
+      stubbed data layer — no browser, no network.</li>
+  <li><strong>Typed interfaces.</strong> Frozen dataclasses throughout; static type checking in CI.</li>
+  <li><strong>Defensive data handling.</strong> Column-name aliasing, encoding detection, timezone
+      normalisation, schema contracts on every download, and atomic file writes with backups.</li>
+  <li><strong>Caching strategy.</strong> Tiered time-to-live by data type — 5 minutes for quotes,
+      30 minutes for history, 24 hours for fundamentals.</li>
+  <li><strong>Command-line tooling.</strong> Scheduled reports and the universe rebuild run headlessly
+      under cron or Windows Task Scheduler, sharing the exact same computation path as the interface.</li>
+</ul>
+
+<h3>3.4 Data engineering</h3>
+<p>The instrument universe is <strong>generated</strong>, not hand-maintained. A build step pulls
+four official exchange files and merges them:</p>
+<table>
+  <thead><tr><th style="width:34%">Source</th><th class="num" style="width:12%">Rows</th><th>Supplies</th></tr></thead>
+  <tbody>
+    <tr><td>NSE equity listing</td><td class="num">2,567</td><td>Symbol, company name, series, ISIN</td></tr>
+    <tr><td>BSE scrip master</td><td class="num">4,991</td><td>Trading symbol, issuer name, ISIN, industry</td></tr>
+    <tr><td>NSE bhavcopy</td><td class="num">3,633</td><td>Daily turnover — used to rank search results</td></tr>
+    <tr><td>BSE bhavcopy</td><td class="num">5,002</td><td>Daily turnover</td></tr>
+  </tbody>
+</table>
+<p class="small">Turnover is not decoration. Without it a full-market search ranks alphabetically:
+typing <em>hdfc</em> returned HDFC AMC ahead of HDFC Bank, and the typo <em>relaince</em> returned
+Reliance <em>Communications</em> (₹0.3 crore traded) ahead of Reliance Industries (₹1,767 crore).
+Ranking by traded value fixed both. The build also refuses to keep a symbol that two independent
+sources agree has stopped trading — it caught four, including <code>TATAMOTORS.NS</code> after the
+group's demerger.</p>
+
+<!-- ══════════════════════════ PART 4 ══════════════════════════ -->
+<h2 class="brk">4 · What it deliberately does not do</h2>
+
+<p>Stated plainly, because a tool's credibility rests on its limits being known rather than
+discovered.</p>
+
+<table>
+  <thead><tr><th style="width:32%">Limitation</th><th>Why, and what it would take to remove</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Prices are delayed, not live</strong></td>
+        <td>Yahoo Finance runs roughly 15 minutes behind for NSE/BSE. Every price carries a timestamp and a freshness label; the application never claims to be real-time. <em>Removing it:</em> a broker feed such as Zerodha Kite or Upstox, behind the existing data interface.</td></tr>
+    <tr><td><strong>No long-horizon return forecast</strong></td>
+        <td>Predicting a 5-, 10- or 11-year return requires pairs of (accounts at year T, return from T to T+N). The data provider supplies five annual periods, which yields four one-year pairs and <strong>zero</strong> from five years out. Rather than print a number fitted to no observations, the application lists every horizon with its training-pair count and the reason. <em>Removing it:</em> a point-in-time fundamentals database with 15+ years of history retaining delisted companies (Compustat, CMIE Prowess, Refinitiv). This is a paid-data problem, not a modelling one.</td></tr>
+    <tr><td><strong>No option chain for NSE/BSE</strong></td>
+        <td>Measured, not assumed: Yahoo returns 21 expiries for <code>AAPL</code> and zero for <code>RELIANCE.NS</code>. Options analytics therefore work from a strike and premium typed off your broker screen. <em>Removing it:</em> an NSE data subscription.</td></tr>
+    <tr><td><strong>The app cannot schedule itself</strong></td>
+        <td>Streamlit runs only while a browser is connected. Scheduled e-mails are delivered by a command run by cron or Windows Task Scheduler — and the interface says so rather than showing a toggle that does nothing.</td></tr>
+    <tr><td><strong>Headline tone is not a prediction</strong></td>
+        <td>A small documented lexicon reads the <em>words</em>, and always shows which ones matched. It does not know what the market had already priced in.</td></tr>
+    <tr><td><strong>Insights are rules, not advice</strong></td>
+        <td>Every insight comes from a documented threshold. The application is analytical and educational; it does not make recommendations.</td></tr>
+  </tbody>
+</table>
+
+<div class="warn avoid">
+  <strong>Why this list is an asset, not a weakness.</strong> Most retail analytics tools fail
+  silently — a missing value becomes a zero, a stale feed keeps rendering, a model extrapolates past
+  its data. This system was built so that each of those is caught and named. One live example: the
+  news feeds originally specified still return valid data with a <em>200 OK</em> response, but have
+  not published since April 2024. The application measures the age of every feed and withholds any
+  source older than seven days — so it shows nothing rather than presenting 870-day-old headlines as
+  today's market news.
+</div>
+
+<!-- ══════════════════════════ PART 5 ══════════════════════════ -->
+<h2>5 · Where to take it next</h2>
+
+<p>Ordered by value relative to effort. <span class="tag t-now">quick win</span> is days of work,
+<span class="tag t-next">medium</span> is a week or two, <span class="tag t-later">strategic</span>
+is a larger commitment or a paid data source.</p>
+
+<h3>5.1 Highest value for a personal investor</h3>
+<table>
+  <thead><tr><th style="width:30%">Feature</th><th style="width:11%">Effort</th><th>Why it matters</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Sector data for NSE listings</strong></td><td><span class="tag t-now">quick win</span></td>
+        <td>BSE publishes an industry label and NSE does not, so ~2,300 NSE-only instruments currently have a blank sector. This silently weakens sector attribution and concentration analysis — the two views most people look at first.</td></tr>
+    <tr><td><strong>News impact event study</strong></td><td><span class="tag t-now">quick win</span></td>
+        <td>Measure the <em>realised</em> abnormal return around a stock's past news and results dates. This is the defensible answer to “what does news do to this stock”, and the data pipeline for it already exists.</td></tr>
+    <tr><td><strong>Capital-gains statement export</strong></td><td><span class="tag t-now">quick win</span></td>
+        <td>The FIFO lot engine and the Indian tax rules are already built. Producing a ready-to-file schedule of realised gains turns a feature into an annual reason to open the app.</td></tr>
+    <tr><td><strong>Dividend and corporate-action tracking</strong></td><td><span class="tag t-next">medium</span></td>
+        <td>Splits and bonuses currently rely on adjusted prices. Explicit handling gives accurate income yield and a correct cost basis.</td></tr>
+    <tr><td><strong>Goal-based planning</strong></td><td><span class="tag t-next">medium</span></td>
+        <td>“Will this portfolio fund a ₹2 crore goal in 12 years?” The Monte Carlo engine already produces the distribution; this frames it as a probability of success.</td></tr>
+    <tr><td><strong>Mutual fund &amp; SIP support</strong></td><td><span class="tag t-later">strategic</span></td>
+        <td>Most Indian retail wealth is in mutual funds, not direct equity. AMFI publishes daily NAVs free. This is the single largest expansion of the addressable audience.</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Highest value for a company or an advisory practice</h3>
+<table>
+  <thead><tr><th style="width:30%">Feature</th><th style="width:11%">Effort</th><th>Why it matters</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Multi-client / multi-account view</strong></td><td><span class="tag t-next">medium</span></td>
+        <td>The store already holds multiple named portfolios. Roll-ups across clients, with per-client reports, turn a personal tool into an advisory product.</td></tr>
+    <tr><td><strong>Branded PDF client reporting</strong></td><td><span class="tag t-now">quick win</span></td>
+        <td>The HTML tearsheet and the scheduled e-mail already exist. Adding a logo, a cover page and an adviser footer makes it a client deliverable.</td></tr>
+    <tr><td><strong>User accounts &amp; access control</strong></td><td><span class="tag t-next">medium</span></td>
+        <td>Required before any multi-user deployment. Streamlit supports authentication; the data layer would move from SQLite to PostgreSQL.</td></tr>
+    <tr><td><strong>Audit trail</strong></td><td><span class="tag t-next">medium</span></td>
+        <td>Who changed what, and when. Necessary for any regulated context, and straightforward given the existing store.</td></tr>
+    <tr><td><strong>Broker API integration</strong></td><td><span class="tag t-later">strategic</span></td>
+        <td>Zerodha Kite or Upstox would remove manual import entirely and provide real-time prices. The architecture already isolates this to one module.</td></tr>
+    <tr><td><strong>Benchmark &amp; peer comparison</strong></td><td><span class="tag t-next">medium</span></td>
+        <td>Compare a client portfolio against model portfolios or a peer group, not only an index.</td></tr>
+    <tr><td><strong>Hosted deployment</strong></td><td><span class="tag t-later">strategic</span></td>
+        <td>The Docker image exists. A hosted instance with scheduled reports makes it a service rather than a program.</td></tr>
+  </tbody>
+</table>
+
+<h3>5.3 Analytical depth, if differentiation is the goal</h3>
+<ul>
+  <li><strong>Point-in-time fundamentals</strong> — the one purchase that would unlock genuine
+      multi-year return modelling, cleanly and honestly.</li>
+  <li><strong>Custom factor construction</strong> — build and backtest factors on the full NSE/BSE
+      universe; the regression machinery and the instrument data are already in place.</li>
+  <li><strong>Transaction-cost and slippage modelling</strong> — rebalancing currently ignores
+      brokerage, STT and impact cost, which materially changes whether a trade is worth making.</li>
+  <li><strong>Fixed income and gold</strong> — most Indian portfolios are multi-asset; equity-only
+      analysis tells a partial story.</li>
+  <li><strong>Scenario builder</strong> — user-defined shocks (“rupee falls 10%, oil rises 30%”)
+      on top of the existing historical stress replay.</li>
+</ul>
+
+<div class="note avoid">
+  <strong>If only three things are done next:</strong> ① NSE sector data, because it silently
+  degrades analysis people already rely on; ② the capital-gains statement, because it creates a
+  recurring reason to use the product; ③ mutual fund support, because it is where most Indian
+  household wealth actually sits.
+</div>
+
+<footer class="small">
+  <strong>QuantFolio v2.6.0</strong> · 62,645 lines of source · 36,068 lines of tests ·
+  4,365 tests passing · 92% coverage · 7,773 instruments · 5,175 ISIN mappings<br>
+  Educational and analytical software. It does not provide investment advice, and it does not
+  claim to supply real-time market data.
+</footer>
+
+</body>
+</html>

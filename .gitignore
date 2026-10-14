@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Streamlit local secrets (never commit credentials)
+.streamlit/secrets.toml
+
+# Editors & OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local portfolio database (contains the user's own holdings and watchlist).
+# The store opens SQLite in WAL mode, which creates -wal and -shm sidecars
+# alongside the database - they carry committed data too, so they are ignored
+# for the same reason the .db is.
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+# ISIN mappings learned from the user's own broker imports. It is a cache
+# (regenerated on the next import) and it names the securities they hold, so
+# it is theirs, not the repository's. The seed file IS committed.
+data/isin_learned.csv
+# Backups the universe build writes before overwriting a stock-master file.
+# Local safety copies of a generated file, not source data.
+data/*.csv.bak
+
+
+# The bundled reference data IS committed:
+# data/indian_stocks.csv (generated from the exchange listings),
+# data/indian_stocks_curated.csv (the hand-maintained seed it is built from),
+# data/us_stocks.csv, data/global_indices.csv, data/isin_seed.csv,
+# data/universe_meta.json (provenance of the generated file)
+
+# Generated reports
+reports/
+*.xlsx
+!data/*.xlsx

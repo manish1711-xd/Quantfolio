@@ -1,0 +1,25 @@
+# QuantFolio Streamlit configuration.
+#
+# The palette here is the *host* theme (chrome, widgets, sidebar). The
+# application's own design tokens live in src/ui/theme.py and are kept in sync
+# with these values - change both together.
+
+[theme]
+base = "dark"
+primaryColor = "#6366f1"
+backgroundColor = "#0b0f19"
+secondaryBackgroundColor = "#141a26"
+textColor = "#e6edf7"
+font = "sans serif"
+
+[server]
+# Keep uploads small: a holdings CSV is kilobytes, not megabytes.
+maxUploadSize = 5
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = "full"
+toolbarMode = "viewer"

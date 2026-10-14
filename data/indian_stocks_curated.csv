@@ -1,0 +1,244 @@
+symbol,yahoo_symbol,name,exchange,country,currency,instrument_type,sector,aliases
+RELIANCE,RELIANCE.NS,Reliance Industries Ltd,NSE,India,INR,EQUITY,Energy,RIL|Reliance
+TCS,TCS.NS,Tata Consultancy Services Ltd,NSE,India,INR,EQUITY,Information Technology,Tata Consultancy
+HDFCBANK,HDFCBANK.NS,HDFC Bank Ltd,NSE,India,INR,EQUITY,Financial Services,HDFC Bank
+ICICIBANK,ICICIBANK.NS,ICICI Bank Ltd,NSE,India,INR,EQUITY,Financial Services,ICICI Bank
+INFY,INFY.NS,Infosys Ltd,NSE,India,INR,EQUITY,Information Technology,Infosys
+BHARTIARTL,BHARTIARTL.NS,Bharti Airtel Ltd,NSE,India,INR,EQUITY,Telecommunication,Airtel|Bharti Airtel
+SBIN,SBIN.NS,State Bank of India,NSE,India,INR,EQUITY,Financial Services,SBI|State Bank
+LICI,LICI.NS,Life Insurance Corporation of India,NSE,India,INR,EQUITY,Financial Services,LIC
+ITC,ITC.NS,ITC Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,ITC Limited
+HINDUNILVR,HINDUNILVR.NS,Hindustan Unilever Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,HUL|Hindustan Unilever
+LT,LT.NS,Larsen & Toubro Ltd,NSE,India,INR,EQUITY,Construction,L&T|Larsen Toubro
+KOTAKBANK,KOTAKBANK.NS,Kotak Mahindra Bank Ltd,NSE,India,INR,EQUITY,Financial Services,Kotak Bank
+AXISBANK,AXISBANK.NS,Axis Bank Ltd,NSE,India,INR,EQUITY,Financial Services,Axis Bank
+MARUTI,MARUTI.NS,Maruti Suzuki India Ltd,NSE,India,INR,EQUITY,Automobile,Maruti|Maruti Suzuki
+SUNPHARMA,SUNPHARMA.NS,Sun Pharmaceutical Industries Ltd,NSE,India,INR,EQUITY,Healthcare,Sun Pharma
+BAJFINANCE,BAJFINANCE.NS,Bajaj Finance Ltd,NSE,India,INR,EQUITY,Financial Services,Bajaj Finance
+HCLTECH,HCLTECH.NS,HCL Technologies Ltd,NSE,India,INR,EQUITY,Information Technology,HCL Tech
+NTPC,NTPC.NS,NTPC Ltd,NSE,India,INR,EQUITY,Power,National Thermal Power
+ONGC,ONGC.NS,Oil & Natural Gas Corporation Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,ONGC
+TATAMOTORS,TATAMOTORS.NS,Tata Motors Ltd,NSE,India,INR,EQUITY,Automobile,Tata Motors
+M&M,M&M.NS,Mahindra & Mahindra Ltd,NSE,India,INR,EQUITY,Automobile,Mahindra|M and M
+ADANIENT,ADANIENT.NS,Adani Enterprises Ltd,NSE,India,INR,EQUITY,Metals & Mining,Adani Enterprises
+ADANIPORTS,ADANIPORTS.NS,Adani Ports and Special Economic Zone Ltd,NSE,India,INR,EQUITY,Services,Adani Ports|APSEZ
+TITAN,TITAN.NS,Titan Company Ltd,NSE,India,INR,EQUITY,Consumer Durables,Titan
+ULTRACEMCO,ULTRACEMCO.NS,UltraTech Cement Ltd,NSE,India,INR,EQUITY,Construction Materials,UltraTech
+ASIANPAINT,ASIANPAINT.NS,Asian Paints Ltd,NSE,India,INR,EQUITY,Consumer Durables,Asian Paints
+POWERGRID,POWERGRID.NS,Power Grid Corporation of India Ltd,NSE,India,INR,EQUITY,Power,Power Grid|PGCIL
+WIPRO,WIPRO.NS,Wipro Ltd,NSE,India,INR,EQUITY,Information Technology,Wipro
+COALINDIA,COALINDIA.NS,Coal India Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Coal India
+JSWSTEEL,JSWSTEEL.NS,JSW Steel Ltd,NSE,India,INR,EQUITY,Metals & Mining,JSW Steel
+NESTLEIND,NESTLEIND.NS,Nestle India Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Nestle
+TATASTEEL,TATASTEEL.NS,Tata Steel Ltd,NSE,India,INR,EQUITY,Metals & Mining,Tata Steel
+BAJAJFINSV,BAJAJFINSV.NS,Bajaj Finserv Ltd,NSE,India,INR,EQUITY,Financial Services,Bajaj Finserv
+GRASIM,GRASIM.NS,Grasim Industries Ltd,NSE,India,INR,EQUITY,Construction Materials,Grasim
+TECHM,TECHM.NS,Tech Mahindra Ltd,NSE,India,INR,EQUITY,Information Technology,Tech Mahindra
+HDFCLIFE,HDFCLIFE.NS,HDFC Life Insurance Company Ltd,NSE,India,INR,EQUITY,Financial Services,HDFC Life
+SBILIFE,SBILIFE.NS,SBI Life Insurance Company Ltd,NSE,India,INR,EQUITY,Financial Services,SBI Life
+INDUSINDBK,INDUSINDBK.NS,IndusInd Bank Ltd,NSE,India,INR,EQUITY,Financial Services,IndusInd
+DRREDDY,DRREDDY.NS,Dr Reddys Laboratories Ltd,NSE,India,INR,EQUITY,Healthcare,Dr Reddy|Dr Reddys
+CIPLA,CIPLA.NS,Cipla Ltd,NSE,India,INR,EQUITY,Healthcare,Cipla
+BRITANNIA,BRITANNIA.NS,Britannia Industries Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Britannia
+EICHERMOT,EICHERMOT.NS,Eicher Motors Ltd,NSE,India,INR,EQUITY,Automobile,Eicher|Royal Enfield
+HEROMOTOCO,HEROMOTOCO.NS,Hero MotoCorp Ltd,NSE,India,INR,EQUITY,Automobile,Hero MotoCorp|Hero Honda
+BAJAJ-AUTO,BAJAJ-AUTO.NS,Bajaj Auto Ltd,NSE,India,INR,EQUITY,Automobile,Bajaj Auto
+HINDALCO,HINDALCO.NS,Hindalco Industries Ltd,NSE,India,INR,EQUITY,Metals & Mining,Hindalco
+APOLLOHOSP,APOLLOHOSP.NS,Apollo Hospitals Enterprise Ltd,NSE,India,INR,EQUITY,Healthcare,Apollo Hospitals
+TATACONSUM,TATACONSUM.NS,Tata Consumer Products Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Tata Consumer|Tata Global
+BPCL,BPCL.NS,Bharat Petroleum Corporation Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Bharat Petroleum
+BEL,BEL.NS,Bharat Electronics Ltd,NSE,India,INR,EQUITY,Capital Goods,Bharat Electronics
+SHRIRAMFIN,SHRIRAMFIN.NS,Shriram Finance Ltd,NSE,India,INR,EQUITY,Financial Services,Shriram Finance|Shriram Transport
+TRENT,TRENT.NS,Trent Ltd,NSE,India,INR,EQUITY,Consumer Services,Trent|Westside
+JIOFIN,JIOFIN.NS,Jio Financial Services Ltd,NSE,India,INR,EQUITY,Financial Services,Jio Financial
+DMART,DMART.NS,Avenue Supermarts Ltd,NSE,India,INR,EQUITY,Consumer Services,DMart|Avenue Supermarts
+HAL,HAL.NS,Hindustan Aeronautics Ltd,NSE,India,INR,EQUITY,Capital Goods,HAL|Hindustan Aeronautics
+VBL,VBL.NS,Varun Beverages Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Varun Beverages
+DIVISLAB,DIVISLAB.NS,Divis Laboratories Ltd,NSE,India,INR,EQUITY,Healthcare,Divis Labs
+ADANIGREEN,ADANIGREEN.NS,Adani Green Energy Ltd,NSE,India,INR,EQUITY,Power,Adani Green
+ADANIENSOL,ADANIENSOL.NS,Adani Energy Solutions Ltd,NSE,India,INR,EQUITY,Power,Adani Energy|Adani Transmission
+ADANIPOWER,ADANIPOWER.NS,Adani Power Ltd,NSE,India,INR,EQUITY,Power,Adani Power
+TATAPOWER,TATAPOWER.NS,Tata Power Company Ltd,NSE,India,INR,EQUITY,Power,Tata Power
+VEDL,VEDL.NS,Vedanta Ltd,NSE,India,INR,EQUITY,Metals & Mining,Vedanta
+IOC,IOC.NS,Indian Oil Corporation Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Indian Oil|IOCL
+GAIL,GAIL.NS,GAIL India Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,GAIL
+LTIM,LTIM.NS,LTIMindtree Ltd,NSE,India,INR,EQUITY,Information Technology,LTI Mindtree|Mindtree
+PIDILITIND,PIDILITIND.NS,Pidilite Industries Ltd,NSE,India,INR,EQUITY,Chemicals,Pidilite|Fevicol
+DABUR,DABUR.NS,Dabur India Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Dabur
+GODREJCP,GODREJCP.NS,Godrej Consumer Products Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Godrej Consumer
+MARICO,MARICO.NS,Marico Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Marico|Parachute
+COLPAL,COLPAL.NS,Colgate-Palmolive India Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Colgate
+BERGEPAINT,BERGEPAINT.NS,Berger Paints India Ltd,NSE,India,INR,EQUITY,Consumer Durables,Berger Paints
+SIEMENS,SIEMENS.NS,Siemens Ltd,NSE,India,INR,EQUITY,Capital Goods,Siemens India
+ABB,ABB.NS,ABB India Ltd,NSE,India,INR,EQUITY,Capital Goods,ABB India
+BOSCHLTD,BOSCHLTD.NS,Bosch Ltd,NSE,India,INR,EQUITY,Automobile,Bosch India
+CUMMINSIND,CUMMINSIND.NS,Cummins India Ltd,NSE,India,INR,EQUITY,Capital Goods,Cummins
+TVSMOTOR,TVSMOTOR.NS,TVS Motor Company Ltd,NSE,India,INR,EQUITY,Automobile,TVS Motor
+ASHOKLEY,ASHOKLEY.NS,Ashok Leyland Ltd,NSE,India,INR,EQUITY,Automobile,Ashok Leyland
+BHARATFORG,BHARATFORG.NS,Bharat Forge Ltd,NSE,India,INR,EQUITY,Automobile,Bharat Forge
+MOTHERSON,MOTHERSON.NS,Samvardhana Motherson International Ltd,NSE,India,INR,EQUITY,Automobile,Motherson Sumi
+BALKRISIND,BALKRISIND.NS,Balkrishna Industries Ltd,NSE,India,INR,EQUITY,Automobile,Balkrishna|BKT Tyres
+MRF,MRF.NS,MRF Ltd,NSE,India,INR,EQUITY,Automobile,MRF Tyres
+APOLLOTYRE,APOLLOTYRE.NS,Apollo Tyres Ltd,NSE,India,INR,EQUITY,Automobile,Apollo Tyres
+CEATLTD,CEATLTD.NS,CEAT Ltd,NSE,India,INR,EQUITY,Automobile,CEAT
+EXIDEIND,EXIDEIND.NS,Exide Industries Ltd,NSE,India,INR,EQUITY,Automobile,Exide
+SONACOMS,SONACOMS.NS,Sona BLW Precision Forgings Ltd,NSE,India,INR,EQUITY,Automobile,Sona Comstar
+TIINDIA,TIINDIA.NS,Tube Investments of India Ltd,NSE,India,INR,EQUITY,Automobile,Tube Investments
+ESCORTS,ESCORTS.NS,Escorts Kubota Ltd,NSE,India,INR,EQUITY,Capital Goods,Escorts
+PIIND,PIIND.NS,PI Industries Ltd,NSE,India,INR,EQUITY,Chemicals,PI Industries
+UPL,UPL.NS,UPL Ltd,NSE,India,INR,EQUITY,Chemicals,UPL
+SRF,SRF.NS,SRF Ltd,NSE,India,INR,EQUITY,Chemicals,SRF
+DEEPAKNTR,DEEPAKNTR.NS,Deepak Nitrite Ltd,NSE,India,INR,EQUITY,Chemicals,Deepak Nitrite
+TATACHEM,TATACHEM.NS,Tata Chemicals Ltd,NSE,India,INR,EQUITY,Chemicals,Tata Chemicals
+AARTIIND,AARTIIND.NS,Aarti Industries Ltd,NSE,India,INR,EQUITY,Chemicals,Aarti Industries
+NAVINFLUOR,NAVINFLUOR.NS,Navin Fluorine International Ltd,NSE,India,INR,EQUITY,Chemicals,Navin Fluorine
+FLUOROCHEM,FLUOROCHEM.NS,Gujarat Fluorochemicals Ltd,NSE,India,INR,EQUITY,Chemicals,Gujarat Fluorochemicals|GFL
+ATUL,ATUL.NS,Atul Ltd,NSE,India,INR,EQUITY,Chemicals,Atul
+LINDEINDIA,LINDEINDIA.NS,Linde India Ltd,NSE,India,INR,EQUITY,Chemicals,Linde India
+COROMANDEL,COROMANDEL.NS,Coromandel International Ltd,NSE,India,INR,EQUITY,Chemicals,Coromandel
+CHAMBLFERT,CHAMBLFERT.NS,Chambal Fertilisers and Chemicals Ltd,NSE,India,INR,EQUITY,Chemicals,Chambal Fertilisers
+GNFC,GNFC.NS,Gujarat Narmada Valley Fertilizers and Chemicals Ltd,NSE,India,INR,EQUITY,Chemicals,GNFC
+RALLIS,RALLIS.NS,Rallis India Ltd,NSE,India,INR,EQUITY,Chemicals,Rallis
+KANSAINER,KANSAINER.NS,Kansai Nerolac Paints Ltd,NSE,India,INR,EQUITY,Consumer Durables,Nerolac
+INDIGOPNTS,INDIGOPNTS.NS,Indigo Paints Ltd,NSE,India,INR,EQUITY,Consumer Durables,Indigo Paints
+AKZOINDIA,AKZOINDIA.NS,Akzo Nobel India Ltd,NSE,India,INR,EQUITY,Consumer Durables,Akzo Nobel|Dulux
+AMBUJACEM,AMBUJACEM.NS,Ambuja Cements Ltd,NSE,India,INR,EQUITY,Construction Materials,Ambuja
+ACC,ACC.NS,ACC Ltd,NSE,India,INR,EQUITY,Construction Materials,ACC Cement
+SHREECEM,SHREECEM.NS,Shree Cement Ltd,NSE,India,INR,EQUITY,Construction Materials,Shree Cement
+DALBHARAT,DALBHARAT.NS,Dalmia Bharat Ltd,NSE,India,INR,EQUITY,Construction Materials,Dalmia Bharat
+JKCEMENT,JKCEMENT.NS,JK Cement Ltd,NSE,India,INR,EQUITY,Construction Materials,JK Cement
+DLF,DLF.NS,DLF Ltd,NSE,India,INR,EQUITY,Realty,DLF
+GODREJPROP,GODREJPROP.NS,Godrej Properties Ltd,NSE,India,INR,EQUITY,Realty,Godrej Properties
+OBEROIRLTY,OBEROIRLTY.NS,Oberoi Realty Ltd,NSE,India,INR,EQUITY,Realty,Oberoi Realty
+PRESTIGE,PRESTIGE.NS,Prestige Estates Projects Ltd,NSE,India,INR,EQUITY,Realty,Prestige Estates
+LODHA,LODHA.NS,Macrotech Developers Ltd,NSE,India,INR,EQUITY,Realty,Lodha|Macrotech
+PHOENIXLTD,PHOENIXLTD.NS,Phoenix Mills Ltd,NSE,India,INR,EQUITY,Realty,Phoenix Mills
+BANKBARODA,BANKBARODA.NS,Bank of Baroda,NSE,India,INR,EQUITY,Financial Services,BOB|Bank of Baroda
+PNB,PNB.NS,Punjab National Bank,NSE,India,INR,EQUITY,Financial Services,PNB
+CANBK,CANBK.NS,Canara Bank,NSE,India,INR,EQUITY,Financial Services,Canara Bank
+UNIONBANK,UNIONBANK.NS,Union Bank of India,NSE,India,INR,EQUITY,Financial Services,Union Bank
+INDIANB,INDIANB.NS,Indian Bank,NSE,India,INR,EQUITY,Financial Services,Indian Bank
+IDFCFIRSTB,IDFCFIRSTB.NS,IDFC First Bank Ltd,NSE,India,INR,EQUITY,Financial Services,IDFC First
+FEDERALBNK,FEDERALBNK.NS,Federal Bank Ltd,NSE,India,INR,EQUITY,Financial Services,Federal Bank
+BANDHANBNK,BANDHANBNK.NS,Bandhan Bank Ltd,NSE,India,INR,EQUITY,Financial Services,Bandhan Bank
+AUBANK,AUBANK.NS,AU Small Finance Bank Ltd,NSE,India,INR,EQUITY,Financial Services,AU Bank
+YESBANK,YESBANK.NS,Yes Bank Ltd,NSE,India,INR,EQUITY,Financial Services,Yes Bank
+RBLBANK,RBLBANK.NS,RBL Bank Ltd,NSE,India,INR,EQUITY,Financial Services,RBL Bank
+CUB,CUB.NS,City Union Bank Ltd,NSE,India,INR,EQUITY,Financial Services,City Union Bank
+KARURVYSYA,KARURVYSYA.NS,Karur Vysya Bank Ltd,NSE,India,INR,EQUITY,Financial Services,Karur Vysya
+CHOLAFIN,CHOLAFIN.NS,Cholamandalam Investment and Finance Company Ltd,NSE,India,INR,EQUITY,Financial Services,Chola Finance|Cholamandalam
+MUTHOOTFIN,MUTHOOTFIN.NS,Muthoot Finance Ltd,NSE,India,INR,EQUITY,Financial Services,Muthoot
+MANAPPURAM,MANAPPURAM.NS,Manappuram Finance Ltd,NSE,India,INR,EQUITY,Financial Services,Manappuram
+LICHSGFIN,LICHSGFIN.NS,LIC Housing Finance Ltd,NSE,India,INR,EQUITY,Financial Services,LIC Housing
+RECLTD,RECLTD.NS,REC Ltd,NSE,India,INR,EQUITY,Financial Services,REC|Rural Electrification
+PFC,PFC.NS,Power Finance Corporation Ltd,NSE,India,INR,EQUITY,Financial Services,Power Finance
+IRFC,IRFC.NS,Indian Railway Finance Corporation Ltd,NSE,India,INR,EQUITY,Financial Services,IRFC
+HUDCO,HUDCO.NS,Housing and Urban Development Corporation Ltd,NSE,India,INR,EQUITY,Financial Services,HUDCO
+SBICARD,SBICARD.NS,SBI Cards and Payment Services Ltd,NSE,India,INR,EQUITY,Financial Services,SBI Card
+HDFCAMC,HDFCAMC.NS,HDFC Asset Management Company Ltd,NSE,India,INR,EQUITY,Financial Services,HDFC AMC
+NAM-INDIA,NAM-INDIA.NS,Nippon Life India Asset Management Ltd,NSE,India,INR,EQUITY,Financial Services,Nippon AMC
+MOTILALOFS,MOTILALOFS.NS,Motilal Oswal Financial Services Ltd,NSE,India,INR,EQUITY,Financial Services,Motilal Oswal
+ANGELONE,ANGELONE.NS,Angel One Ltd,NSE,India,INR,EQUITY,Financial Services,Angel One|Angel Broking
+CDSL,CDSL.NS,Central Depository Services India Ltd,NSE,India,INR,EQUITY,Financial Services,CDSL
+BSE,BSE.NS,BSE Ltd,NSE,India,INR,EQUITY,Financial Services,Bombay Stock Exchange
+MCX,MCX.NS,Multi Commodity Exchange of India Ltd,NSE,India,INR,EQUITY,Financial Services,MCX
+KFINTECH,KFINTECH.NS,KFin Technologies Ltd,NSE,India,INR,EQUITY,Financial Services,KFintech
+CAMS,CAMS.NS,Computer Age Management Services Ltd,NSE,India,INR,EQUITY,Financial Services,CAMS
+POONAWALLA,POONAWALLA.NS,Poonawalla Fincorp Ltd,NSE,India,INR,EQUITY,Financial Services,Poonawalla
+SUNDARMFIN,SUNDARMFIN.NS,Sundaram Finance Ltd,NSE,India,INR,EQUITY,Financial Services,Sundaram Finance
+CREDITACC,CREDITACC.NS,CreditAccess Grameen Ltd,NSE,India,INR,EQUITY,Financial Services,CreditAccess
+ICICIGI,ICICIGI.NS,ICICI Lombard General Insurance Company Ltd,NSE,India,INR,EQUITY,Financial Services,ICICI Lombard
+ICICIPRULI,ICICIPRULI.NS,ICICI Prudential Life Insurance Company Ltd,NSE,India,INR,EQUITY,Financial Services,ICICI Prudential
+MAXHEALTH,MAXHEALTH.NS,Max Healthcare Institute Ltd,NSE,India,INR,EQUITY,Healthcare,Max Healthcare
+FORTIS,FORTIS.NS,Fortis Healthcare Ltd,NSE,India,INR,EQUITY,Healthcare,Fortis
+LUPIN,LUPIN.NS,Lupin Ltd,NSE,India,INR,EQUITY,Healthcare,Lupin
+AUROPHARMA,AUROPHARMA.NS,Aurobindo Pharma Ltd,NSE,India,INR,EQUITY,Healthcare,Aurobindo
+TORNTPHARM,TORNTPHARM.NS,Torrent Pharmaceuticals Ltd,NSE,India,INR,EQUITY,Healthcare,Torrent Pharma
+ALKEM,ALKEM.NS,Alkem Laboratories Ltd,NSE,India,INR,EQUITY,Healthcare,Alkem
+ZYDUSLIFE,ZYDUSLIFE.NS,Zydus Lifesciences Ltd,NSE,India,INR,EQUITY,Healthcare,Zydus|Cadila
+GLENMARK,GLENMARK.NS,Glenmark Pharmaceuticals Ltd,NSE,India,INR,EQUITY,Healthcare,Glenmark
+BIOCON,BIOCON.NS,Biocon Ltd,NSE,India,INR,EQUITY,Healthcare,Biocon
+IPCALAB,IPCALAB.NS,Ipca Laboratories Ltd,NSE,India,INR,EQUITY,Healthcare,Ipca
+MANKIND,MANKIND.NS,Mankind Pharma Ltd,NSE,India,INR,EQUITY,Healthcare,Mankind
+SYNGENE,SYNGENE.NS,Syngene International Ltd,NSE,India,INR,EQUITY,Healthcare,Syngene
+PERSISTENT,PERSISTENT.NS,Persistent Systems Ltd,NSE,India,INR,EQUITY,Information Technology,Persistent
+COFORGE,COFORGE.NS,Coforge Ltd,NSE,India,INR,EQUITY,Information Technology,Coforge|NIIT Technologies
+MPHASIS,MPHASIS.NS,Mphasis Ltd,NSE,India,INR,EQUITY,Information Technology,Mphasis
+OFSS,OFSS.NS,Oracle Financial Services Software Ltd,NSE,India,INR,EQUITY,Information Technology,Oracle Financial
+KPITTECH,KPITTECH.NS,KPIT Technologies Ltd,NSE,India,INR,EQUITY,Information Technology,KPIT
+TATAELXSI,TATAELXSI.NS,Tata Elxsi Ltd,NSE,India,INR,EQUITY,Information Technology,Tata Elxsi
+NAUKRI,NAUKRI.NS,Info Edge India Ltd,NSE,India,INR,EQUITY,Consumer Services,Naukri|Info Edge
+PAYTM,PAYTM.NS,One 97 Communications Ltd,NSE,India,INR,EQUITY,Financial Services,Paytm
+NYKAA,NYKAA.NS,FSN E-Commerce Ventures Ltd,NSE,India,INR,EQUITY,Consumer Services,Nykaa
+POLICYBZR,POLICYBZR.NS,PB Fintech Ltd,NSE,India,INR,EQUITY,Financial Services,Policybazaar|PB Fintech
+IRCTC,IRCTC.NS,Indian Railway Catering and Tourism Corporation Ltd,NSE,India,INR,EQUITY,Consumer Services,IRCTC
+INDIGO,INDIGO.NS,InterGlobe Aviation Ltd,NSE,India,INR,EQUITY,Services,IndiGo|InterGlobe
+INDHOTEL,INDHOTEL.NS,Indian Hotels Company Ltd,NSE,India,INR,EQUITY,Consumer Services,Taj Hotels|Indian Hotels
+PETRONET,PETRONET.NS,Petronet LNG Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Petronet
+IGL,IGL.NS,Indraprastha Gas Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Indraprastha Gas
+MGL,MGL.NS,Mahanagar Gas Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Mahanagar Gas
+GUJGASLTD,GUJGASLTD.NS,Gujarat Gas Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Gujarat Gas
+OIL,OIL.NS,Oil India Ltd,NSE,India,INR,EQUITY,Oil Gas & Consumable Fuels,Oil India
+NHPC,NHPC.NS,NHPC Ltd,NSE,India,INR,EQUITY,Power,NHPC
+SJVN,SJVN.NS,SJVN Ltd,NSE,India,INR,EQUITY,Power,SJVN
+JSWENERGY,JSWENERGY.NS,JSW Energy Ltd,NSE,India,INR,EQUITY,Power,JSW Energy
+TORNTPOWER,TORNTPOWER.NS,Torrent Power Ltd,NSE,India,INR,EQUITY,Power,Torrent Power
+NATIONALUM,NATIONALUM.NS,National Aluminium Company Ltd,NSE,India,INR,EQUITY,Metals & Mining,NALCO
+SAIL,SAIL.NS,Steel Authority of India Ltd,NSE,India,INR,EQUITY,Metals & Mining,SAIL
+JINDALSTEL,JINDALSTEL.NS,Jindal Steel & Power Ltd,NSE,India,INR,EQUITY,Metals & Mining,Jindal Steel|JSPL
+NMDC,NMDC.NS,NMDC Ltd,NSE,India,INR,EQUITY,Metals & Mining,NMDC
+HINDZINC,HINDZINC.NS,Hindustan Zinc Ltd,NSE,India,INR,EQUITY,Metals & Mining,Hindustan Zinc
+APLAPOLLO,APLAPOLLO.NS,APL Apollo Tubes Ltd,NSE,India,INR,EQUITY,Capital Goods,APL Apollo
+BDL,BDL.NS,Bharat Dynamics Ltd,NSE,India,INR,EQUITY,Capital Goods,Bharat Dynamics
+MAZDOCK,MAZDOCK.NS,Mazagon Dock Shipbuilders Ltd,NSE,India,INR,EQUITY,Capital Goods,Mazagon Dock
+COCHINSHIP,COCHINSHIP.NS,Cochin Shipyard Ltd,NSE,India,INR,EQUITY,Capital Goods,Cochin Shipyard
+BHEL,BHEL.NS,Bharat Heavy Electricals Ltd,NSE,India,INR,EQUITY,Capital Goods,BHEL
+THERMAX,THERMAX.NS,Thermax Ltd,NSE,India,INR,EQUITY,Capital Goods,Thermax
+CGPOWER,CGPOWER.NS,CG Power and Industrial Solutions Ltd,NSE,India,INR,EQUITY,Capital Goods,CG Power|Crompton Greaves
+HONAUT,HONAUT.NS,Honeywell Automation India Ltd,NSE,India,INR,EQUITY,Capital Goods,Honeywell India
+SCHAEFFLER,SCHAEFFLER.NS,Schaeffler India Ltd,NSE,India,INR,EQUITY,Automobile,Schaeffler
+KEC,KEC.NS,KEC International Ltd,NSE,India,INR,EQUITY,Capital Goods,KEC International
+POLYCAB,POLYCAB.NS,Polycab India Ltd,NSE,India,INR,EQUITY,Capital Goods,Polycab
+KEI,KEI.NS,KEI Industries Ltd,NSE,India,INR,EQUITY,Capital Goods,KEI Industries
+DIXON,DIXON.NS,Dixon Technologies India Ltd,NSE,India,INR,EQUITY,Consumer Durables,Dixon
+AMBER,AMBER.NS,Amber Enterprises India Ltd,NSE,India,INR,EQUITY,Consumer Durables,Amber Enterprises
+VOLTAS,VOLTAS.NS,Voltas Ltd,NSE,India,INR,EQUITY,Consumer Durables,Voltas
+BLUESTARCO,BLUESTARCO.NS,Blue Star Ltd,NSE,India,INR,EQUITY,Consumer Durables,Blue Star
+CROMPTON,CROMPTON.NS,Crompton Greaves Consumer Electricals Ltd,NSE,India,INR,EQUITY,Consumer Durables,Crompton
+HAVELLS,HAVELLS.NS,Havells India Ltd,NSE,India,INR,EQUITY,Consumer Durables,Havells
+ASTRAL,ASTRAL.NS,Astral Ltd,NSE,India,INR,EQUITY,Capital Goods,Astral Pipes
+SUPREMEIND,SUPREMEIND.NS,Supreme Industries Ltd,NSE,India,INR,EQUITY,Capital Goods,Supreme Industries
+KAJARIACER,KAJARIACER.NS,Kajaria Ceramics Ltd,NSE,India,INR,EQUITY,Consumer Durables,Kajaria
+PAGEIND,PAGEIND.NS,Page Industries Ltd,NSE,India,INR,EQUITY,Textiles,Page Industries|Jockey
+ABFRL,ABFRL.NS,Aditya Birla Fashion and Retail Ltd,NSE,India,INR,EQUITY,Consumer Services,ABFRL|Aditya Birla Fashion
+JUBLFOOD,JUBLFOOD.NS,Jubilant Foodworks Ltd,NSE,India,INR,EQUITY,Consumer Services,Jubilant Foodworks|Dominos
+DEVYANI,DEVYANI.NS,Devyani International Ltd,NSE,India,INR,EQUITY,Consumer Services,Devyani|KFC India
+UBL,UBL.NS,United Breweries Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,United Breweries|Kingfisher
+RADICO,RADICO.NS,Radico Khaitan Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Radico Khaitan
+EMAMILTD,EMAMILTD.NS,Emami Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Emami
+JYOTHYLAB,JYOTHYLAB.NS,Jyothy Labs Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Jyothy Labs
+HONASA,HONASA.NS,Honasa Consumer Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Mamaearth|Honasa
+PATANJALI,PATANJALI.NS,Patanjali Foods Ltd,NSE,India,INR,EQUITY,Fast Moving Consumer Goods,Patanjali|Ruchi Soya
+TATACOMM,TATACOMM.NS,Tata Communications Ltd,NSE,India,INR,EQUITY,Telecommunication,Tata Communications
+IDEA,IDEA.NS,Vodafone Idea Ltd,NSE,India,INR,EQUITY,Telecommunication,Vodafone Idea|Vi
+HFCL,HFCL.NS,HFCL Ltd,NSE,India,INR,EQUITY,Telecommunication,HFCL
+SUNTV,SUNTV.NS,Sun TV Network Ltd,NSE,India,INR,EQUITY,Media,Sun TV
+ZEEL,ZEEL.NS,Zee Entertainment Enterprises Ltd,NSE,India,INR,EQUITY,Media,Zee Entertainment
+PVRINOX,PVRINOX.NS,PVR INOX Ltd,NSE,India,INR,EQUITY,Media,PVR|INOX
+CONCOR,CONCOR.NS,Container Corporation of India Ltd,NSE,India,INR,EQUITY,Services,CONCOR
+GMRAIRPORT,GMRAIRPORT.NS,GMR Airports Ltd,NSE,India,INR,EQUITY,Services,GMR Airports|GMR Infra
+IRB,IRB.NS,IRB Infrastructure Developers Ltd,NSE,India,INR,EQUITY,Construction,IRB Infra
+NBCC,NBCC.NS,NBCC India Ltd,NSE,India,INR,EQUITY,Construction,NBCC
+RVNL,RVNL.NS,Rail Vikas Nigam Ltd,NSE,India,INR,EQUITY,Construction,RVNL
+IREDA,IREDA.NS,Indian Renewable Energy Development Agency Ltd,NSE,India,INR,EQUITY,Financial Services,IREDA
+NIFTYBEES,NIFTYBEES.NS,Nippon India ETF Nifty 50 BeES,NSE,India,INR,ETF,Index Fund,Nifty BeES|Nifty 50 ETF
+JUNIORBEES,JUNIORBEES.NS,Nippon India ETF Nifty Next 50 Junior BeES,NSE,India,INR,ETF,Index Fund,Junior BeES|Next 50 ETF
+BANKBEES,BANKBEES.NS,Nippon India ETF Nifty Bank BeES,NSE,India,INR,ETF,Index Fund,Bank BeES|Bank Nifty ETF
+GOLDBEES,GOLDBEES.NS,Nippon India ETF Gold BeES,NSE,India,INR,ETF,Commodity,Gold BeES|Gold ETF
+SILVERBEES,SILVERBEES.NS,Nippon India Silver ETF,NSE,India,INR,ETF,Commodity,Silver BeES|Silver ETF
+LIQUIDBEES,LIQUIDBEES.NS,Nippon India ETF Nifty 1D Rate Liquid BeES,NSE,India,INR,ETF,Liquid,Liquid BeES
+ITBEES,ITBEES.NS,Nippon India ETF Nifty IT,NSE,India,INR,ETF,Index Fund,IT BeES|IT ETF
+SETFNIF50,SETFNIF50.NS,SBI Nifty 50 ETF,NSE,India,INR,ETF,Index Fund,SBI Nifty ETF
+CPSEETF,CPSEETF.NS,CPSE ETF,NSE,India,INR,ETF,Index Fund,CPSE
+MON100,MON100.NS,Motilal Oswal NASDAQ 100 ETF,NSE,India,INR,ETF,International,Nasdaq 100 ETF India|MOFN100
+MAFANG,MAFANG.NS,Mirae Asset NYSE FANG Plus ETF,NSE,India,INR,ETF,International,FANG ETF India

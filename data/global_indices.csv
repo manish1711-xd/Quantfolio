@@ -1,0 +1,16 @@
+symbol,yahoo_symbol,name,exchange,country,currency,instrument_type,sector,aliases
+NSEI,^NSEI,NIFTY 50,INDEX,India,INR,INDEX,Index,Nifty|Nifty 50|Nifty Fifty
+NSEBANK,^NSEBANK,NIFTY Bank,INDEX,India,INR,INDEX,Index,Bank Nifty|Nifty Bank
+NSEMDCP50,^NSEMDCP50,NIFTY Midcap 50,INDEX,India,INR,INDEX,Index,Nifty Midcap
+BSESN,^BSESN,S&P BSE SENSEX,INDEX,India,INR,INDEX,Index,Sensex|BSE Sensex
+GSPC,^GSPC,S&P 500,INDEX,United States,USD,INDEX,Index,S&P 500|SP500
+NDX,^NDX,NASDAQ 100,INDEX,United States,USD,INDEX,Index,Nasdaq 100
+IXIC,^IXIC,NASDAQ Composite,INDEX,United States,USD,INDEX,Index,Nasdaq Composite
+DJI,^DJI,Dow Jones Industrial Average,INDEX,United States,USD,INDEX,Index,Dow Jones|Dow 30
+RUT,^RUT,Russell 2000,INDEX,United States,USD,INDEX,Index,Russell 2000
+VIX,^VIX,CBOE Volatility Index,INDEX,United States,USD,INDEX,Index,VIX|Volatility Index
+FTSE,^FTSE,FTSE 100,INDEX,United Kingdom,GBP,INDEX,Index,FTSE 100
+N225,^N225,Nikkei 225,INDEX,Japan,JPY,INDEX,Index,Nikkei
+HSI,^HSI,Hang Seng Index,INDEX,Hong Kong,HKD,INDEX,Index,Hang Seng
+GDAXI,^GDAXI,DAX Performance Index,INDEX,Germany,EUR,INDEX,Index,DAX
+STOXX50E,^STOXX50E,EURO STOXX 50,INDEX,Europe,EUR,INDEX,Index,Euro Stoxx 50

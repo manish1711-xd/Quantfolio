@@ -1,0 +1,35 @@
+# --- Core data & maths ---
+pandas>=2.2,<3.0
+numpy>=1.26
+
+# --- Optimisation, statistics, clustering ---
+# Added in v2: mean-variance/risk-parity optimisation (scipy.optimize.minimize),
+# XIRR root-finding (brentq/newton), chi-square p-values for the VaR backtest,
+# and hierarchical clustering of the correlation matrix. All genuinely need scipy;
+# reimplementing SLSQP by hand would be worse engineering, not better.
+scipy>=1.11
+
+# --- Machine learning (forecasting models) ---
+# Added in v3 for src/analytics/forecast.py: RidgeCV / ElasticNetCV with an
+# inner time-series CV, RandomForest and HistGradientBoosting regressors,
+# permutation importance, and TimeSeriesSplit. Deliberately NOT a deep-learning
+# framework: a daily bar history is a few thousand rows with a signal-to-noise
+# ratio near zero, so an LSTM would memorise its training set while adding a
+# dependency larger than the rest of this application put together.
+scikit-learn>=1.5
+
+# --- Market data (Yahoo Finance client) ---
+yfinance>=0.2.50
+
+# --- Interactive charts ---
+plotly>=5.20
+
+# --- Dashboard ---
+streamlit>=1.50
+
+# --- Excel report export ---
+XlsxWriter>=3.2
+
+# NOTE: matplotlib, requests, torch and tensorflow remain deliberately absent -
+# every chart is an interactive Plotly figure, yfinance manages its own HTTP
+# layer, and the forecasting models are the ones the data volume can support.

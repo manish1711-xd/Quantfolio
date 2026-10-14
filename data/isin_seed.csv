@@ -1,0 +1,115 @@
+isin,yahoo_symbol,name,source
+INE002A01018,RELIANCE.NS,Reliance Industries Ltd,seed
+INE009A01021,INFY.NS,Infosys Ltd,seed
+INE016A01026,DABUR.NS,Dabur India Ltd,seed
+INE018A01030,LT.NS,Larsen & Toubro Ltd,seed
+INE019A01038,JSWSTEEL.NS,JSW Steel Ltd,seed
+INE021A01026,ASIANPAINT.NS,Asian Paints Ltd,seed
+INE029A01011,BPCL.NS,Bharat Petroleum Corporation Ltd,seed
+INE030A01027,HINDUNILVR.NS,Hindustan Unilever Ltd,seed
+INE038A01020,HINDALCO.NS,Hindalco Industries Ltd,seed
+INE040A01034,HDFCBANK.NS,HDFC Bank Ltd,seed
+INE044A01036,SUNPHARMA.NS,Sun Pharmaceutical Industries Ltd,seed
+INE047A01021,GRASIM.NS,Grasim Industries Ltd,seed
+INE059A01026,CIPLA.NS,Cipla Ltd,seed
+INE062A01020,SBIN.NS,State Bank of India,seed
+INE066A01021,EICHERMOT.NS,Eicher Motors Ltd,seed
+INE066F01020,HAL.NS,Hindustan Aeronautics Ltd,seed
+INE075A01022,WIPRO.NS,Wipro Ltd,seed
+INE081A01020,TATASTEEL.NS,Tata Steel Ltd,seed
+INE089A01031,DRREDDY.NS,Dr Reddys Laboratories Ltd,seed
+INE090A01021,ICICIBANK.NS,ICICI Bank Ltd,seed
+INE095A01012,INDUSINDBK.NS,IndusInd Bank Ltd,seed
+INE0J1Y01017,LICI.NS,Life Insurance Corporation of India,seed
+INE101A01026,M&M.NS,Mahindra & Mahindra Ltd,seed
+INE123W01016,SBILIFE.NS,SBI Life Insurance Company Ltd,seed
+INE129A01019,GAIL.NS,GAIL India Ltd,seed
+INE154A01025,ITC.NS,ITC Ltd,seed
+INE155A01022,TMPV.NS,Tata Motors Passenger Vehicles Ltd,seed
+INE158A01026,HEROMOTOCO.NS,Hero MotoCorp Ltd,seed
+INE192A01025,TATACONSUM.NS,Tata Consumer Products Ltd,seed
+INE192R01011,DMART.NS,Avenue Supermarts Ltd,seed
+INE200M01021,VBL.NS,Varun Beverages Ltd,seed
+INE205A01025,VEDL.NS,Vedanta Ltd,seed
+INE213A01029,ONGC.NS,Oil & Natural Gas Corporation Ltd,seed
+INE214T01019,LTM.NS,LTM Ltd,seed
+INE216A01030,BRITANNIA.NS,Britannia Industries Ltd,seed
+INE237A01028,KOTAKBANK.NS,Kotak Mahindra Bank Ltd,seed
+INE238A01034,AXISBANK.NS,Axis Bank Ltd,seed
+INE239A01016,NESTLEIND.NS,Nestle India Ltd,seed
+INE242A01010,IOC.NS,Indian Oil Corporation Ltd,seed
+INE245A01021,TATAPOWER.NS,Tata Power Company Ltd,seed
+INE263A01024,BEL.NS,Bharat Electronics Ltd,seed
+INE280A01028,TITAN.NS,Titan Company Ltd,seed
+INE296A01024,BAJFINANCE.NS,Bajaj Finance Ltd,seed
+INE318A01026,PIDILITIND.NS,Pidilite Industries Ltd,seed
+INE361B01024,DIVISLAB.NS,Divis Laboratories Ltd,seed
+INE397D01024,BHARTIARTL.NS,Bharti Airtel Ltd,seed
+INE423A01024,ADANIENT.NS,Adani Enterprises Ltd,seed
+INE437A01024,APOLLOHOSP.NS,Apollo Hospitals Enterprise Ltd,seed
+INE467B01029,TCS.NS,Tata Consultancy Services Ltd,seed
+INE481G01011,ULTRACEMCO.NS,UltraTech Cement Ltd,seed
+INE522F01014,COALINDIA.NS,Coal India Ltd,seed
+INE585B01010,MARUTI.NS,Maruti Suzuki India Ltd,seed
+INE669C01036,TECHM.NS,Tech Mahindra Ltd,seed
+INE721A01047,SHRIRAMFIN.NS,Shriram Finance Ltd,seed
+INE733E01010,NTPC.NS,NTPC Ltd,seed
+INE742F01042,ADANIPORTS.NS,Adani Ports and Special Economic Zone Ltd,seed
+INE752E01010,POWERGRID.NS,Power Grid Corporation of India Ltd,seed
+INE758E01017,JIOFIN.NS,Jio Financial Services Ltd,seed
+INE795G01014,HDFCLIFE.NS,HDFC Life Insurance Company Ltd,seed
+INE849A01020,TRENT.NS,Trent Ltd,seed
+INE860A01027,HCLTECH.NS,HCL Technologies Ltd,seed
+INE917I01010,BAJAJ-AUTO.NS,Bajaj Auto Ltd,seed
+INE918I01018,BAJAJFINSV.NS,Bajaj Finserv Ltd,seed
+INF204KB14I2,NIFTYBEES.NS,Nippon India ETF Nifty 50 BeES,seed
+INF204KB17I5,GOLDBEES.NS,Nippon India ETF Gold BeES,seed
+US0028241000,ABT,Abbott Laboratories,seed
+US00287Y1091,ABBV,AbbVie Inc,seed
+US00724F1012,ADBE,Adobe Inc,seed
+US0079031078,AMD,Advanced Micro Devices Inc,seed
+US02079K1079,GOOG,Alphabet Inc Class C,seed
+US02079K3059,GOOGL,Alphabet Inc Class A,seed
+US0231351067,AMZN,Amazon.com Inc,seed
+US0378331005,AAPL,Apple Inc,seed
+US0605051046,BAC,Bank of America Corporation,seed
+US0846707026,BRK-B,Berkshire Hathaway Inc Class B,seed
+US11135F1012,AVGO,Broadcom Inc,seed
+US1491231015,CAT,Caterpillar Inc,seed
+US1667641005,CVX,Chevron Corporation,seed
+US17275R1023,CSCO,Cisco Systems Inc,seed
+US1912161007,KO,Coca-Cola Company,seed
+US22160K1051,COST,Costco Wholesale Corporation,seed
+US2546871060,DIS,Walt Disney Company,seed
+US30231G1022,XOM,Exxon Mobil Corporation,seed
+US30303M1027,META,Meta Platforms Inc,seed
+US4370761029,HD,Home Depot Inc,seed
+US4592001014,IBM,International Business Machines Corporation,seed
+US46090E1038,QQQ,Invesco QQQ Trust,seed
+US4642872000,IVV,iShares Core S&P 500 ETF,seed
+US46625H1005,JPM,JPMorgan Chase & Co,seed
+US4781601046,JNJ,Johnson & Johnson,seed
+US5324571083,LLY,Eli Lilly and Company,seed
+US57636Q1040,MA,Mastercard Incorporated,seed
+US5801351017,MCD,McDonalds Corporation,seed
+US58933Y1055,MRK,Merck & Co Inc,seed
+US5949181045,MSFT,Microsoft Corporation,seed
+US64110L1061,NFLX,Netflix Inc,seed
+US67066G1040,NVDA,NVIDIA Corporation,seed
+US68389X1054,ORCL,Oracle Corporation,seed
+US7134481081,PEP,PepsiCo Inc,seed
+US7427181091,PG,Procter & Gamble Company,seed
+US7475251036,QCOM,QUALCOMM Incorporated,seed
+US78462F1030,SPY,SPDR S&P 500 ETF Trust,seed
+US78463V1070,GLD,SPDR Gold Shares,seed
+US79466L3024,CRM,Salesforce Inc,seed
+US88160R1014,TSLA,Tesla Inc,seed
+US8825081040,TXN,Texas Instruments Incorporated,seed
+US8835561023,TMO,Thermo Fisher Scientific Inc,seed
+US91324P1021,UNH,UnitedHealth Group Incorporated,seed
+US9229083632,VOO,Vanguard S&P 500 ETF,seed
+US9229087690,VTI,Vanguard Total Stock Market ETF,seed
+US92343V1044,VZ,Verizon Communications Inc,seed
+US92826C8394,V,Visa Inc,seed
+US9311421039,WMT,Walmart Inc,seed
+US9497461015,WFC,Wells Fargo & Company,seed

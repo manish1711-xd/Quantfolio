@@ -1,0 +1,190 @@
+symbol,yahoo_symbol,name,exchange,country,currency,instrument_type,sector,aliases
+AAPL,AAPL,Apple Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Apple
+MSFT,MSFT,Microsoft Corporation,NASDAQ,United States,USD,EQUITY,Information Technology,Microsoft
+NVDA,NVDA,NVIDIA Corporation,NASDAQ,United States,USD,EQUITY,Information Technology,Nvidia
+GOOGL,GOOGL,Alphabet Inc Class A,NASDAQ,United States,USD,EQUITY,Communication Services,Google|Alphabet
+GOOG,GOOG,Alphabet Inc Class C,NASDAQ,United States,USD,EQUITY,Communication Services,Google|Alphabet
+AMZN,AMZN,Amazon.com Inc,NASDAQ,United States,USD,EQUITY,Consumer Discretionary,Amazon
+META,META,Meta Platforms Inc,NASDAQ,United States,USD,EQUITY,Communication Services,Facebook|Meta
+TSLA,TSLA,Tesla Inc,NASDAQ,United States,USD,EQUITY,Consumer Discretionary,Tesla
+BRK-B,BRK-B,Berkshire Hathaway Inc Class B,NYSE,United States,USD,EQUITY,Financials,Berkshire Hathaway|Berkshire
+AVGO,AVGO,Broadcom Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Broadcom
+LLY,LLY,Eli Lilly and Company,NYSE,United States,USD,EQUITY,Health Care,Eli Lilly|Lilly
+JPM,JPM,JPMorgan Chase & Co,NYSE,United States,USD,EQUITY,Financials,JP Morgan|JPMorgan
+V,V,Visa Inc,NYSE,United States,USD,EQUITY,Financials,Visa
+MA,MA,Mastercard Incorporated,NYSE,United States,USD,EQUITY,Financials,Mastercard
+UNH,UNH,UnitedHealth Group Incorporated,NYSE,United States,USD,EQUITY,Health Care,UnitedHealth
+XOM,XOM,Exxon Mobil Corporation,NYSE,United States,USD,EQUITY,Energy,Exxon|ExxonMobil
+COST,COST,Costco Wholesale Corporation,NASDAQ,United States,USD,EQUITY,Consumer Staples,Costco
+WMT,WMT,Walmart Inc,NYSE,United States,USD,EQUITY,Consumer Staples,Walmart
+PG,PG,Procter & Gamble Company,NYSE,United States,USD,EQUITY,Consumer Staples,Procter Gamble|P&G
+JNJ,JNJ,Johnson & Johnson,NYSE,United States,USD,EQUITY,Health Care,Johnson and Johnson|J&J
+HD,HD,Home Depot Inc,NYSE,United States,USD,EQUITY,Consumer Discretionary,Home Depot
+ABBV,ABBV,AbbVie Inc,NYSE,United States,USD,EQUITY,Health Care,AbbVie
+NFLX,NFLX,Netflix Inc,NASDAQ,United States,USD,EQUITY,Communication Services,Netflix
+BAC,BAC,Bank of America Corporation,NYSE,United States,USD,EQUITY,Financials,Bank of America|BofA
+KO,KO,Coca-Cola Company,NYSE,United States,USD,EQUITY,Consumer Staples,Coca Cola|Coke
+MRK,MRK,Merck & Co Inc,NYSE,United States,USD,EQUITY,Health Care,Merck
+CVX,CVX,Chevron Corporation,NYSE,United States,USD,EQUITY,Energy,Chevron
+AMD,AMD,Advanced Micro Devices Inc,NASDAQ,United States,USD,EQUITY,Information Technology,AMD
+PEP,PEP,PepsiCo Inc,NASDAQ,United States,USD,EQUITY,Consumer Staples,Pepsi|PepsiCo
+TMO,TMO,Thermo Fisher Scientific Inc,NYSE,United States,USD,EQUITY,Health Care,Thermo Fisher
+CRM,CRM,Salesforce Inc,NYSE,United States,USD,EQUITY,Information Technology,Salesforce
+ADBE,ADBE,Adobe Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Adobe
+ORCL,ORCL,Oracle Corporation,NYSE,United States,USD,EQUITY,Information Technology,Oracle
+CSCO,CSCO,Cisco Systems Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Cisco
+ACN,ACN,Accenture plc,NYSE,Ireland,USD,EQUITY,Information Technology,Accenture
+MCD,MCD,McDonalds Corporation,NYSE,United States,USD,EQUITY,Consumer Discretionary,McDonalds
+LIN,LIN,Linde plc,NASDAQ,United Kingdom,USD,EQUITY,Materials,Linde
+ABT,ABT,Abbott Laboratories,NYSE,United States,USD,EQUITY,Health Care,Abbott
+WFC,WFC,Wells Fargo & Company,NYSE,United States,USD,EQUITY,Financials,Wells Fargo
+DIS,DIS,Walt Disney Company,NYSE,United States,USD,EQUITY,Communication Services,Disney
+TMUS,TMUS,T-Mobile US Inc,NASDAQ,United States,USD,EQUITY,Communication Services,T Mobile
+PM,PM,Philip Morris International Inc,NYSE,United States,USD,EQUITY,Consumer Staples,Philip Morris
+INTU,INTU,Intuit Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Intuit
+IBM,IBM,International Business Machines Corporation,NYSE,United States,USD,EQUITY,Information Technology,IBM
+GE,GE,GE Aerospace,NYSE,United States,USD,EQUITY,Industrials,General Electric|GE
+CAT,CAT,Caterpillar Inc,NYSE,United States,USD,EQUITY,Industrials,Caterpillar
+QCOM,QCOM,QUALCOMM Incorporated,NASDAQ,United States,USD,EQUITY,Information Technology,Qualcomm
+VZ,VZ,Verizon Communications Inc,NYSE,United States,USD,EQUITY,Communication Services,Verizon
+TXN,TXN,Texas Instruments Incorporated,NASDAQ,United States,USD,EQUITY,Information Technology,Texas Instruments
+NOW,NOW,ServiceNow Inc,NYSE,United States,USD,EQUITY,Information Technology,ServiceNow
+DHR,DHR,Danaher Corporation,NYSE,United States,USD,EQUITY,Health Care,Danaher
+AMGN,AMGN,Amgen Inc,NASDAQ,United States,USD,EQUITY,Health Care,Amgen
+NEE,NEE,NextEra Energy Inc,NYSE,United States,USD,EQUITY,Utilities,NextEra
+PFE,PFE,Pfizer Inc,NYSE,United States,USD,EQUITY,Health Care,Pfizer
+SPGI,SPGI,S&P Global Inc,NYSE,United States,USD,EQUITY,Financials,S&P Global
+UNP,UNP,Union Pacific Corporation,NYSE,United States,USD,EQUITY,Industrials,Union Pacific
+RTX,RTX,RTX Corporation,NYSE,United States,USD,EQUITY,Industrials,Raytheon|RTX
+LOW,LOW,Lowes Companies Inc,NYSE,United States,USD,EQUITY,Consumer Discretionary,Lowes
+HON,HON,Honeywell International Inc,NASDAQ,United States,USD,EQUITY,Industrials,Honeywell
+AMAT,AMAT,Applied Materials Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Applied Materials
+GS,GS,Goldman Sachs Group Inc,NYSE,United States,USD,EQUITY,Financials,Goldman Sachs
+BLK,BLK,BlackRock Inc,NYSE,United States,USD,EQUITY,Financials,BlackRock
+SYK,SYK,Stryker Corporation,NYSE,United States,USD,EQUITY,Health Care,Stryker
+BKNG,BKNG,Booking Holdings Inc,NASDAQ,United States,USD,EQUITY,Consumer Discretionary,Booking|Booking.com
+ELV,ELV,Elevance Health Inc,NYSE,United States,USD,EQUITY,Health Care,Elevance|Anthem
+PLD,PLD,Prologis Inc,NYSE,United States,USD,EQUITY,Real Estate,Prologis
+TJX,TJX,TJX Companies Inc,NYSE,United States,USD,EQUITY,Consumer Discretionary,TJX|TJ Maxx
+COP,COP,ConocoPhillips,NYSE,United States,USD,EQUITY,Energy,Conoco|ConocoPhillips
+ADP,ADP,Automatic Data Processing Inc,NASDAQ,United States,USD,EQUITY,Industrials,ADP
+VRTX,VRTX,Vertex Pharmaceuticals Incorporated,NASDAQ,United States,USD,EQUITY,Health Care,Vertex
+MDT,MDT,Medtronic plc,NYSE,Ireland,USD,EQUITY,Health Care,Medtronic
+LRCX,LRCX,Lam Research Corporation,NASDAQ,United States,USD,EQUITY,Information Technology,Lam Research
+MU,MU,Micron Technology Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Micron
+PANW,PANW,Palo Alto Networks Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Palo Alto Networks
+KLAC,KLAC,KLA Corporation,NASDAQ,United States,USD,EQUITY,Information Technology,KLA
+ADI,ADI,Analog Devices Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Analog Devices
+CB,CB,Chubb Limited,NYSE,Switzerland,USD,EQUITY,Financials,Chubb
+MMC,MMC,Marsh & McLennan Companies Inc,NYSE,United States,USD,EQUITY,Financials,Marsh McLennan
+SBUX,SBUX,Starbucks Corporation,NASDAQ,United States,USD,EQUITY,Consumer Discretionary,Starbucks
+INTC,INTC,Intel Corporation,NASDAQ,United States,USD,EQUITY,Information Technology,Intel
+BSX,BSX,Boston Scientific Corporation,NYSE,United States,USD,EQUITY,Health Care,Boston Scientific
+CI,CI,Cigna Group,NYSE,United States,USD,EQUITY,Health Care,Cigna
+SO,SO,Southern Company,NYSE,United States,USD,EQUITY,Utilities,Southern Company
+MO,MO,Altria Group Inc,NYSE,United States,USD,EQUITY,Consumer Staples,Altria|Marlboro
+ZTS,ZTS,Zoetis Inc,NYSE,United States,USD,EQUITY,Health Care,Zoetis
+DUK,DUK,Duke Energy Corporation,NYSE,United States,USD,EQUITY,Utilities,Duke Energy
+ISRG,ISRG,Intuitive Surgical Inc,NASDAQ,United States,USD,EQUITY,Health Care,Intuitive Surgical
+REGN,REGN,Regeneron Pharmaceuticals Inc,NASDAQ,United States,USD,EQUITY,Health Care,Regeneron
+BMY,BMY,Bristol-Myers Squibb Company,NYSE,United States,USD,EQUITY,Health Care,Bristol Myers
+EQIX,EQIX,Equinix Inc,NASDAQ,United States,USD,EQUITY,Real Estate,Equinix
+SHW,SHW,Sherwin-Williams Company,NYSE,United States,USD,EQUITY,Materials,Sherwin Williams
+ICE,ICE,Intercontinental Exchange Inc,NYSE,United States,USD,EQUITY,Financials,ICE
+CME,CME,CME Group Inc,NASDAQ,United States,USD,EQUITY,Financials,CME
+MCO,MCO,Moodys Corporation,NYSE,United States,USD,EQUITY,Financials,Moodys
+AON,AON,Aon plc,NYSE,Ireland,USD,EQUITY,Financials,Aon
+PGR,PGR,Progressive Corporation,NYSE,United States,USD,EQUITY,Financials,Progressive
+CVS,CVS,CVS Health Corporation,NYSE,United States,USD,EQUITY,Health Care,CVS
+GILD,GILD,Gilead Sciences Inc,NASDAQ,United States,USD,EQUITY,Health Care,Gilead
+NKE,NKE,NIKE Inc,NYSE,United States,USD,EQUITY,Consumer Discretionary,Nike
+FI,FI,Fiserv Inc,NYSE,United States,USD,EQUITY,Financials,Fiserv
+APD,APD,Air Products and Chemicals Inc,NYSE,United States,USD,EQUITY,Materials,Air Products
+ITW,ITW,Illinois Tool Works Inc,NYSE,United States,USD,EQUITY,Industrials,Illinois Tool Works
+ETN,ETN,Eaton Corporation plc,NYSE,Ireland,USD,EQUITY,Industrials,Eaton
+EMR,EMR,Emerson Electric Co,NYSE,United States,USD,EQUITY,Industrials,Emerson
+NSC,NSC,Norfolk Southern Corporation,NYSE,United States,USD,EQUITY,Industrials,Norfolk Southern
+CSX,CSX,CSX Corporation,NASDAQ,United States,USD,EQUITY,Industrials,CSX
+FDX,FDX,FedEx Corporation,NYSE,United States,USD,EQUITY,Industrials,FedEx
+UPS,UPS,United Parcel Service Inc,NYSE,United States,USD,EQUITY,Industrials,UPS
+DE,DE,Deere & Company,NYSE,United States,USD,EQUITY,Industrials,John Deere|Deere
+LMT,LMT,Lockheed Martin Corporation,NYSE,United States,USD,EQUITY,Industrials,Lockheed Martin
+GD,GD,General Dynamics Corporation,NYSE,United States,USD,EQUITY,Industrials,General Dynamics
+NOC,NOC,Northrop Grumman Corporation,NYSE,United States,USD,EQUITY,Industrials,Northrop Grumman
+BA,BA,Boeing Company,NYSE,United States,USD,EQUITY,Industrials,Boeing
+MSI,MSI,Motorola Solutions Inc,NYSE,United States,USD,EQUITY,Information Technology,Motorola
+SNPS,SNPS,Synopsys Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Synopsys
+CDNS,CDNS,Cadence Design Systems Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Cadence
+CRWD,CRWD,CrowdStrike Holdings Inc,NASDAQ,United States,USD,EQUITY,Information Technology,CrowdStrike
+ANET,ANET,Arista Networks Inc,NYSE,United States,USD,EQUITY,Information Technology,Arista
+UBER,UBER,Uber Technologies Inc,NYSE,United States,USD,EQUITY,Industrials,Uber
+ABNB,ABNB,Airbnb Inc,NASDAQ,United States,USD,EQUITY,Consumer Discretionary,Airbnb
+PYPL,PYPL,PayPal Holdings Inc,NASDAQ,United States,USD,EQUITY,Financials,PayPal
+SHOP,SHOP,Shopify Inc,NASDAQ,Canada,USD,EQUITY,Information Technology,Shopify
+SPOT,SPOT,Spotify Technology SA,NYSE,Luxembourg,USD,EQUITY,Communication Services,Spotify
+PLTR,PLTR,Palantir Technologies Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Palantir
+SMCI,SMCI,Super Micro Computer Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Supermicro
+MRVL,MRVL,Marvell Technology Inc,NASDAQ,United States,USD,EQUITY,Information Technology,Marvell
+ON,ON,ON Semiconductor Corporation,NASDAQ,United States,USD,EQUITY,Information Technology,onsemi
+NXPI,NXPI,NXP Semiconductors NV,NASDAQ,Netherlands,USD,EQUITY,Information Technology,NXP
+ASML,ASML,ASML Holding NV,NASDAQ,Netherlands,USD,EQUITY,Information Technology,ASML
+TSM,TSM,Taiwan Semiconductor Manufacturing Company Limited,NYSE,Taiwan,USD,EQUITY,Information Technology,TSMC|Taiwan Semiconductor
+BABA,BABA,Alibaba Group Holding Limited,NYSE,China,USD,EQUITY,Consumer Discretionary,Alibaba
+INFY,INFY,Infosys Limited ADR,NYSE,India,USD,EQUITY,Information Technology,Infosys ADR
+HDB,HDB,HDFC Bank Limited ADR,NYSE,India,USD,EQUITY,Financials,HDFC Bank ADR
+IBN,IBN,ICICI Bank Limited ADR,NYSE,India,USD,EQUITY,Financials,ICICI Bank ADR
+WIT,WIT,Wipro Limited ADR,NYSE,India,USD,EQUITY,Information Technology,Wipro ADR
+RDY,RDY,Dr Reddys Laboratories Limited ADR,NYSE,India,USD,EQUITY,Health Care,Dr Reddys ADR
+SPY,SPY,SPDR S&P 500 ETF Trust,NYSEARCA,United States,USD,ETF,Index Fund,S&P 500 ETF|SPDR 500
+VOO,VOO,Vanguard S&P 500 ETF,NYSEARCA,United States,USD,ETF,Index Fund,Vanguard 500
+IVV,IVV,iShares Core S&P 500 ETF,NYSEARCA,United States,USD,ETF,Index Fund,iShares 500
+QQQ,QQQ,Invesco QQQ Trust,NASDAQ,United States,USD,ETF,Index Fund,Nasdaq 100 ETF|QQQ
+VTI,VTI,Vanguard Total Stock Market ETF,NYSEARCA,United States,USD,ETF,Index Fund,Vanguard Total Market
+VEA,VEA,Vanguard FTSE Developed Markets ETF,NYSEARCA,United States,USD,ETF,International,Vanguard Developed
+VWO,VWO,Vanguard FTSE Emerging Markets ETF,NYSEARCA,United States,USD,ETF,International,Vanguard Emerging
+IEFA,IEFA,iShares Core MSCI EAFE ETF,NYSEARCA,United States,USD,ETF,International,iShares EAFE
+EFA,EFA,iShares MSCI EAFE ETF,NYSEARCA,United States,USD,ETF,International,MSCI EAFE
+EEM,EEM,iShares MSCI Emerging Markets ETF,NYSEARCA,United States,USD,ETF,International,Emerging Markets ETF
+INDA,INDA,iShares MSCI India ETF,NASDAQ,United States,USD,ETF,International,India ETF|MSCI India
+EPI,EPI,WisdomTree India Earnings Fund,NYSEARCA,United States,USD,ETF,International,WisdomTree India
+URTH,URTH,iShares MSCI World ETF,NYSEARCA,United States,USD,ETF,International,MSCI World
+ACWI,ACWI,iShares MSCI ACWI ETF,NASDAQ,United States,USD,ETF,International,MSCI ACWI|All Country World
+AGG,AGG,iShares Core US Aggregate Bond ETF,NYSEARCA,United States,USD,ETF,Fixed Income,Aggregate Bond ETF
+BND,BND,Vanguard Total Bond Market ETF,NASDAQ,United States,USD,ETF,Fixed Income,Vanguard Bond
+TLT,TLT,iShares 20 Plus Year Treasury Bond ETF,NASDAQ,United States,USD,ETF,Fixed Income,Long Treasury ETF
+IEF,IEF,iShares 7-10 Year Treasury Bond ETF,NASDAQ,United States,USD,ETF,Fixed Income,Intermediate Treasury ETF
+SHY,SHY,iShares 1-3 Year Treasury Bond ETF,NASDAQ,United States,USD,ETF,Fixed Income,Short Treasury ETF
+BIL,BIL,SPDR Bloomberg 1-3 Month T-Bill ETF,NYSEARCA,United States,USD,ETF,Fixed Income,T-Bill ETF
+LQD,LQD,iShares iBoxx Investment Grade Corporate Bond ETF,NYSEARCA,United States,USD,ETF,Fixed Income,Investment Grade Corporate
+HYG,HYG,iShares iBoxx High Yield Corporate Bond ETF,NYSEARCA,United States,USD,ETF,Fixed Income,High Yield ETF|Junk Bond
+GLD,GLD,SPDR Gold Shares,NYSEARCA,United States,USD,ETF,Commodity,Gold ETF|SPDR Gold
+IAU,IAU,iShares Gold Trust,NYSEARCA,United States,USD,ETF,Commodity,iShares Gold
+SLV,SLV,iShares Silver Trust,NYSEARCA,United States,USD,ETF,Commodity,Silver ETF
+DBC,DBC,Invesco DB Commodity Index Tracking Fund,NYSEARCA,United States,USD,ETF,Commodity,Commodity Index ETF
+USO,USO,United States Oil Fund LP,NYSEARCA,United States,USD,ETF,Commodity,Oil ETF
+VNQ,VNQ,Vanguard Real Estate ETF,NYSEARCA,United States,USD,ETF,Real Estate,REIT ETF|Vanguard REIT
+XLK,XLK,Technology Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Tech Sector ETF
+XLF,XLF,Financial Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Financial Sector ETF
+XLE,XLE,Energy Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Energy Sector ETF
+XLV,XLV,Health Care Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Health Care Sector ETF
+XLY,XLY,Consumer Discretionary Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Consumer Discretionary ETF
+XLP,XLP,Consumer Staples Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Consumer Staples ETF
+XLI,XLI,Industrial Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Industrial Sector ETF
+XLU,XLU,Utilities Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Utilities Sector ETF
+XLB,XLB,Materials Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Materials Sector ETF
+XLRE,XLRE,Real Estate Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Real Estate Sector ETF
+XLC,XLC,Communication Services Select Sector SPDR Fund,NYSEARCA,United States,USD,ETF,Sector,Communication Sector ETF
+SMH,SMH,VanEck Semiconductor ETF,NASDAQ,United States,USD,ETF,Sector,Semiconductor ETF
+SOXX,SOXX,iShares Semiconductor ETF,NASDAQ,United States,USD,ETF,Sector,iShares Semiconductor
+ARKK,ARKK,ARK Innovation ETF,NYSEARCA,United States,USD,ETF,Thematic,ARK Innovation
+IWM,IWM,iShares Russell 2000 ETF,NYSEARCA,United States,USD,ETF,Index Fund,Russell 2000 ETF
+DIA,DIA,SPDR Dow Jones Industrial Average ETF Trust,NYSEARCA,United States,USD,ETF,Index Fund,Dow ETF
+RSP,RSP,Invesco S&P 500 Equal Weight ETF,NYSEARCA,United States,USD,ETF,Index Fund,Equal Weight 500
+SCHD,SCHD,Schwab US Dividend Equity ETF,NYSEARCA,United States,USD,ETF,Factor,Schwab Dividend
+VIG,VIG,Vanguard Dividend Appreciation ETF,NYSEARCA,United States,USD,ETF,Factor,Dividend Appreciation
+VYM,VYM,Vanguard High Dividend Yield ETF,NYSEARCA,United States,USD,ETF,Factor,High Dividend Yield
+MTUM,MTUM,iShares MSCI USA Momentum Factor ETF,NYSEARCA,United States,USD,ETF,Factor,Momentum ETF
+QUAL,QUAL,iShares MSCI USA Quality Factor ETF,NYSEARCA,United States,USD,ETF,Factor,Quality ETF
+USMV,USMV,iShares MSCI USA Min Vol Factor ETF,NYSEARCA,United States,USD,ETF,Factor,Min Vol ETF
+VTV,VTV,Vanguard Value ETF,NYSEARCA,United States,USD,ETF,Factor,Large Cap Value
+VUG,VUG,Vanguard Growth ETF,NYSEARCA,United States,USD,ETF,Factor,Large Cap Growth

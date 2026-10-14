@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-09-02T19:34:56+00:00",
+  "rows": 7569,
+  "with_isin": 7557,
+  "with_turnover": 7052,
+  "sources": [
+    {
+      "source": "NSE equity listing",
+      "url": "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
+      "rows": 2567,
+      "as_of": ""
+    },
+    {
+      "source": "BSE scrip master",
+      "url": "https://api.bseindia.com/BseIndiaAPI/api/ListofScripData/w?Group=&Scripcode=&industry=&segment=Equity&status=Active",
+      "rows": 4991,
+      "as_of": ""
+    },
+    {
+      "source": "NSE bhavcopy",
+      "url": "https://nsearchives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_20260902_F_0000.csv.zip",
+      "rows": 3633,
+      "as_of": "2026-09-02"
+    },
+    {
+      "source": "BSE bhavcopy",
+      "url": "https://www.bseindia.com/download/BhavCopy/Equity/BhavCopy_BSE_CM_0_0_0_20260902_F_0000.CSV",
+      "rows": 5002,
+      "as_of": "2026-09-02"
+    }
+  ],
+  "as_of": "2026-09-02"
+}
