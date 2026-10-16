@@ -32,6 +32,13 @@ Economic Times, Business Standard and LiveMint market feeds (all age 0 days
 when measured), Yahoo Finance per-ticker headlines, and the ForexFactory
 economic calendar.
 
+Per-company news is the one thing the market feeds above cannot supply -- a
+market feed names whichever companies it names -- so it comes from Google News
+RSS search, scoped to the company. That source is what the company page
+actually runs on: Yahoo Finance's ``.news`` attribute, the earlier per-company
+source, now returns an empty list for every ticker. See
+:func:`fetch_company_news`.
+
 The calendar's real limitation
 ------------------------------
 ``ff_calendar_thisweek.json`` is the only horizon published — ``nextweek``
@@ -58,6 +65,7 @@ import json
 import logging
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from collections.abc import Iterable
@@ -75,6 +83,7 @@ __all__ = [
     "IMPACT_ORDER",
     "FEEDS",
     "CALENDAR_URL",
+    "GOOGLE_NEWS_URL",
     "NewsItem",
     "FeedResult",
     "CalendarEvent",
@@ -82,6 +91,8 @@ __all__ = [
     "fetch_feed",
     "fetch_feeds",
     "fetch_ticker_news",
+    "fetch_company_news",
+    "company_query",
     "fetch_calendar",
 ]
 
@@ -144,6 +155,16 @@ FEEDS: dict[str, tuple[str, str, str]] = {
 #: ForexFactory's own JSON feed, the one their public widget reads. Only the
 #: current week is published; ``ff_calendar_nextweek.json`` is a 404.
 CALENDAR_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+
+#: Google News' RSS search endpoint. Query parameters are appended per request
+#: rather than here, because the query is the whole point of the call.
+#:
+#: This is the per-company source the app actually runs on: Yahoo Finance's
+#: ``.news`` attribute -- the previous one -- now returns an empty list for
+#: every ticker, so a company page built on it silently showed nothing. Google
+#: News answers with real dated items from Indian outlets and needs no key,
+#: which is what keeps it inside the app's public-feed contract.
+GOOGLE_NEWS_URL = "https://news.google.com/rss/search"
 
 _TAG = re.compile(r"<[^>]+>")
 _SPACE = re.compile(r"\s+")
@@ -434,6 +455,118 @@ def fetch_feeds(
     """Every requested feed. One failing feed never stops the others."""
     wanted = list(keys) if keys is not None else list(FEEDS)
     return [fetch_feed(key, max_age_days, timeout, now) for key in wanted]
+
+
+# ---------------------------------------------------------------------------
+# company news -- Google News RSS
+# ---------------------------------------------------------------------------
+def company_query(name: str, symbol: str = "") -> str:
+    """A Google News search string for one company.
+
+    A multi-word name is quoted: without the quotes Google treats "Polycab
+    India" as two loose terms and returns any company that happens to share a
+    word with it, which is noise dressed as company coverage. The symbol is a
+    *fallback* for the caller that holds only a ticker, not something appended
+    to the name -- a bare Indian ticker in the query pulls in headlines that
+    merely quote the symbol, and the quoted name is the stronger signal.
+    """
+    label = _clean_text(name)
+    ticker = _clean_text(symbol)
+    if not label:
+        return ticker
+    return f'"{label}"' if " " in label else label
+
+
+def _google_news_url(query: str) -> str:
+    """The search URL for ``query``, pinned to the Indian edition.
+
+    ``hl``, ``gl`` and ``ceid`` are what make this the Indian edition; drop them
+    and the same query is answered from the US edition, where the mid- and
+    small-cap companies this app covers barely appear.
+    """
+    return f"{GOOGLE_NEWS_URL}?q={urllib.parse.quote_plus(query)}&hl=en-IN&gl=IN&ceid=IN:en"
+
+
+def _split_publisher(title: str, source: str) -> tuple[str, str]:
+    """``(headline, publisher)`` from Google's ``"Headline - Publisher"`` title.
+
+    Google appends the outlet to every title, so leaving it on would render
+    "Q2 profit rises 40% - The Economic Times" directly beneath a source line
+    that already names The Economic Times. The ``<source>`` element is preferred
+    when present; the title's trailing segment is the fallback for the shape
+    where it is absent, and either way the suffix comes off the headline shown.
+    """
+    head, sep, tail = title.rpartition(" - ")
+    if sep and head.strip():
+        title = head.strip()
+        source = source or tail.strip()
+    return title, source
+
+
+def _parse_company_feed(body: bytes, limit: int = 40) -> tuple[NewsItem, ...]:
+    """Items from a Google News RSS body, newest first, at most ``limit``.
+
+    Split out from the fetch so the parse can be exercised offline against
+    literal XML. Unreadable bytes yield ``()`` rather than an exception: a
+    malformed response is a "no news found" state for the caller, not a reason
+    to take the page down with it.
+    """
+    try:
+        root = ET.fromstring(body)
+    except (ET.ParseError, ValueError):
+        return ()
+
+    items: list[NewsItem] = []
+    for node in root.findall(".//item"):
+        raw_title = _clean_text(node.findtext("title"))
+        if not raw_title:
+            continue
+        title, source = _split_publisher(raw_title, _clean_text(node.findtext("source")))
+        if not title:
+            continue
+        items.append(
+            NewsItem(
+                title=title,
+                link=_clean_text(node.findtext("link")),
+                published=_parse_when(node.findtext("pubDate")),
+                source=source,
+                summary=_clean_text(node.findtext("description")),
+                region="IN",
+            )
+        )
+
+    # Undated items sort last rather than presenting as the newest thing.
+    items.sort(key=lambda i: i.published or datetime.min, reverse=True)
+    return tuple(items[: max(int(limit), 0)])
+
+
+def fetch_company_news(query: str, limit: int = 40) -> tuple[NewsItem, ...]:
+    """Google News headlines for one company, or ``()``.
+
+    **This never raises.** A company page renders a "no news found" state when
+    the tuple is empty, and that page must survive Google being unreachable,
+    answering an error, or returning bytes that are not XML -- so every one of
+    those collapses to ``()`` here instead of propagating. Callers therefore
+    check ``if not items`` and do not guard the call.
+
+    No staleness guard, unlike the registered feeds: a search result is scoped
+    to one company and each item carries its own visible date, so an old
+    headline is labelled rather than withheld. ``limit`` is a ceiling; fewer
+    items come back when Google has fewer.
+    """
+    text = (query or "").strip()
+    if not text:
+        return ()
+
+    try:
+        body, notice = _download(_google_news_url(text))
+        if notice:
+            logger.warning("Company news for %r %s", text, notice)
+            return ()
+        return _parse_company_feed(body, limit)
+    except Exception as exc:  # noqa: BLE001 - a news failure must not break a page
+        logger.warning("Company news for %r failed: %s", text, exc)
+        return ()
 
 
 # ---------------------------------------------------------------------------

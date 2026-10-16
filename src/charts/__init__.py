@@ -53,6 +53,15 @@ from src.charts.performance import (
     return_bar,
     value_bar,
 )
+from src.charts.research import (
+    common_size_chart,
+    financial_trend_chart,
+    peer_median_chart,
+    scorecard_breakdown_chart,
+    sensitivity_heatmap,
+    sentiment_scatter,
+    volatility_regime_chart,
+)
 from src.charts.risk import (
     drawdown_chart,
     drawdown_episodes_chart,
@@ -139,6 +148,14 @@ __all__ = [
     "fan_chart",
     "sample_paths_chart",
     "terminal_distribution",
+    # company research
+    "common_size_chart",
+    "financial_trend_chart",
+    "peer_median_chart",
+    "scorecard_breakdown_chart",
+    "sensitivity_heatmap",
+    "sentiment_scatter",
+    "volatility_regime_chart",
     # technicals
     "macd_chart",
     "price_chart",

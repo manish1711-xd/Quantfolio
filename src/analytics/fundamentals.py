@@ -231,20 +231,49 @@ def _div(numerator: float, denominator: float) -> float:
 # ---------------------------------------------------------------------------
 # statements
 # ---------------------------------------------------------------------------
+def _label_key(label: object) -> str:
+    """A row label reduced to lowercase alphanumerics, for tolerant matching.
+
+    The provider has renamed its statement row labels at least once:
+    yfinance 0.2.x returned ``"Total Revenue"`` and 1.x returns
+    ``"TotalRevenue"``. Both spell the same line, and a strict string compare
+    silently yields NaN for every multi-word item on the newer format --
+    revenue, operating income, tax and interest expense all became NaN with no
+    error anywhere. Folding case and punctuation away makes :data:`LINE_ITEMS`
+    survive this rename and the next one, instead of needing a second spelling
+    enumerated for every field.
+    """
+    return "".join(ch for ch in str(label).lower() if ch.isalnum())
+
+
 def line_item(frame: object, field_name: str, column: object) -> float:
     """One canonical field from one period of a statement frame, or NaN.
 
     Looks up every alternate label in :data:`LINE_ITEMS` and takes the first
     that is present *and* numeric, so a row that exists but is blank for this
     period falls through to the alternate rather than poisoning the result.
+
+    An exact match is tried first, then a punctuation- and case-insensitive
+    pass, which is what keeps this working across provider label renames. The
+    tolerant pass is only reached on a miss, so the common path stays a plain
+    dict lookup.
     """
     if not isinstance(frame, pd.DataFrame) or frame.empty:
         return _NAN
     if column not in frame.columns:
         return _NAN
-    for label in LINE_ITEMS.get(field_name, (field_name,)):
+
+    candidates = LINE_ITEMS.get(field_name, (field_name,))
+    for label in candidates:
         if label in frame.index:
             value = _num(frame.at[label, column])
+            if not math.isnan(value):
+                return value
+
+    wanted = {_label_key(label) for label in candidates}
+    for row in frame.index:
+        if _label_key(row) in wanted:
+            value = _num(frame.at[row, column])
             if not math.isnan(value):
                 return value
     return _NAN

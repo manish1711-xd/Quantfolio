@@ -737,3 +737,159 @@ def test_the_limit_is_honoured(fake_ticker_news) -> None:
     items, _notice = nw.fetch_ticker_news("RELIANCE.NS", limit=1)
 
     assert len(items) == 1
+
+
+# ---------------------------------------------------------------------------
+# company news -- Google News RSS
+# ---------------------------------------------------------------------------
+def google_rss(items: list[tuple[str, str, str, str]]) -> bytes:
+    """A Google News shaped RSS document from ``(title, pubDate, link, source)``.
+
+    ``source`` of "" omits the ``<source>`` element, which is the shape that
+    forces the publisher to be split off the title instead.
+    """
+    body = ""
+    for title, stamp, link, source in items:
+        element = f'<source url="https://example.test">{source}</source>' if source else ""
+        body += (
+            f"<item><title>{title}</title><link>{link}</link><pubDate>{stamp}</pubDate>"
+            f"{element}<description>&lt;b&gt;{title}&lt;/b&gt;</description></item>"
+        )
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>'
+        f"<title>Company - Google News</title>{body}</channel></rss>"
+    ).encode()
+
+
+GOOGLE = google_rss(
+    [
+        (
+            "Polycab India Q2 profit rises 40% - The Economic Times",
+            "Wed, 02 Sep 2026 09:30:00 GMT",
+            "https://news.google.com/rss/articles/aaa",
+            "The Economic Times",
+        ),
+        (
+            "Cables demand lifts Polycab order book - Moneycontrol.com",
+            "Tue, 01 Sep 2026 05:00:00 GMT",
+            "https://news.google.com/rss/articles/bbb",
+            "",
+        ),
+    ]
+)
+
+
+def test_a_multi_word_company_name_is_quoted() -> None:
+    """Unquoted, "Polycab India" is two loose terms and matches any other
+    company sharing a word with it."""
+    assert nw.company_query("Polycab India") == '"Polycab India"'
+
+
+def test_a_single_word_company_name_is_left_bare() -> None:
+    assert nw.company_query("Infosys") == "Infosys"
+
+
+def test_the_symbol_is_a_fallback_when_no_name_is_given() -> None:
+    """A caller holding only a ticker still gets a usable query, and appending
+    the ticker to a real name would only add ticker-noise headlines."""
+    assert nw.company_query("", "POLYCAB.NS") == "POLYCAB.NS"
+    assert nw.company_query("   ", "INFY") == "INFY"
+    assert nw.company_query("", "") == ""
+
+
+def test_the_publisher_element_supplies_the_source() -> None:
+    """Google appends the outlet to the title; leaving it there would repeat
+    it beside a source line that already names it."""
+    items = nw._parse_company_feed(GOOGLE)
+
+    assert items[0].title == "Polycab India Q2 profit rises 40%"
+    assert items[0].source == "The Economic Times"
+
+
+def test_the_publisher_is_split_off_the_title_when_the_element_is_absent() -> None:
+    items = nw._parse_company_feed(GOOGLE)
+
+    assert items[1].title == "Cables demand lifts Polycab order book"
+    assert items[1].source == "Moneycontrol.com"
+
+
+def test_a_company_item_is_dated_and_scoped_to_india() -> None:
+    items = nw._parse_company_feed(GOOGLE)
+
+    assert items[0].published == datetime(2026, 9, 2, 9, 30)
+    assert items[0].published.tzinfo is None
+    assert items[0].region == "IN"
+
+
+def test_company_items_come_back_newest_first() -> None:
+    items = nw._parse_company_feed(GOOGLE)
+
+    assert [i.published for i in items] == sorted((i.published for i in items), reverse=True)
+
+
+def test_company_markup_is_stripped_from_the_summary() -> None:
+    items = nw._parse_company_feed(GOOGLE)
+
+    assert "<b>" not in items[0].summary
+    assert "Polycab India Q2 profit rises 40%" in items[0].summary
+
+
+def test_the_company_limit_is_honoured() -> None:
+    assert len(nw._parse_company_feed(GOOGLE, limit=1)) == 1
+
+
+def test_unreadable_company_xml_returns_nothing_rather_than_raising() -> None:
+    """A malformed response is a "no news found" state, not a page crash."""
+    assert nw._parse_company_feed(b"<rss><channel><item>unclosed") == ()
+    assert nw._parse_company_feed(b"") == ()
+    assert nw._parse_company_feed(b"not xml at all") == ()
+
+
+def test_company_news_returns_nothing_when_the_provider_is_unreachable(wire) -> None:
+    """The hard requirement: the page must not break when Google is down."""
+    wire({"news.google": urllib.error.URLError("down")})
+
+    assert nw.fetch_company_news("Polycab India") == ()
+
+
+def test_company_news_returns_nothing_on_an_http_error(wire) -> None:
+    wire({"news.google": urllib.error.HTTPError("u", 503, "err", {}, None)})
+
+    assert nw.fetch_company_news("Polycab India") == ()
+
+
+def test_company_news_returns_nothing_when_no_query_is_given(wire) -> None:
+    asked = wire({"news.google": GOOGLE})
+
+    assert nw.fetch_company_news("   ") == ()
+    assert asked == []  # and no request was made
+
+
+def test_company_news_parses_a_wire_response(wire) -> None:
+    wire({"news.google": GOOGLE})
+
+    items = nw.fetch_company_news("Polycab India")
+
+    assert len(items) == 2
+    assert items[0].title == "Polycab India Q2 profit rises 40%"
+
+
+@pytest.mark.network
+@pytest.mark.slow
+def test_the_live_company_search_still_answers() -> None:
+    """Deselect with ``-m "not network"``; CI does.
+
+    The offline tests prove the parse; only this proves Google still serves the
+    RSS search the parser is written against. It SKIPS rather than fails when
+    the provider is unreachable, so an outage or a blocked network is never
+    reported as a defect in this repository.
+    """
+    items = nw.fetch_company_news(nw.company_query("Polycab India"), limit=10)
+
+    if not items:
+        pytest.skip("Google News unreachable or returned nothing (offline or throttled)")
+
+    assert all(i.region == "IN" for i in items)
+    assert all(i.title for i in items)
+    dated = [i for i in items if i.published is not None]
+    assert [i.published for i in dated] == sorted((i.published for i in dated), reverse=True)

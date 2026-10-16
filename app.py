@@ -59,6 +59,7 @@ def _pages() -> dict[str, list]:
         portfolio,
         rebalance,
         reports,
+        research,
         risk,
         security,
         simulation,
@@ -90,6 +91,7 @@ def _pages() -> dict[str, list]:
             page(rebalance.render, "Rebalance", ":material/balance:", "rebalance"),
         ],
         "Research": [
+            page(research.render, "Company research", ":material/manage_search:", "research"),
             page(security.render, "Security deep dive", ":material/query_stats:", "security"),
             page(forecast.render, "Price forecast", ":material/auto_graph:", "forecast"),
             page(watchlist.render, "Watchlist", ":material/visibility:", "watchlist"),

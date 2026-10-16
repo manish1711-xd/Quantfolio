@@ -747,3 +747,57 @@ def test_an_unavailable_score_headline_says_why() -> None:
 
     assert "not available" in result.headline
     assert "of 4 inputs" in result.headline
+
+
+# ---------------------------------------------------------------------------
+# label matching across provider renames
+# ---------------------------------------------------------------------------
+#: The two spellings yfinance has used for the same statement rows. It returned
+#: spaced labels through 0.2.x and camelCase from 1.x, and the switch was silent:
+#: every multi-word line became NaN with no exception anywhere, which quietly
+#: zeroed revenue, operating income, tax and interest expense across the whole
+#: app. Both spellings must resolve to the same number.
+RENAME_PAIRS = (
+    ("Total Revenue", "TotalRevenue"),
+    ("Operating Income", "OperatingIncome"),
+    ("Interest Expense", "InterestExpense"),
+)
+
+
+def _single_row_frame(label: str, value: float) -> pd.DataFrame:
+    return pd.DataFrame({PERIODS[0]: [value]}, index=[label])
+
+
+@pytest.mark.parametrize(("spaced", "camel"), RENAME_PAIRS)
+def test_a_renamed_row_label_resolves_to_the_same_value(spaced: str, camel: str) -> None:
+    """The regression this file exists to prevent: a silent rename to NaN."""
+    value = 13_942.0
+    field = {v[0]: k for k, v in fu.LINE_ITEMS.items() if v}[spaced]
+
+    spaced_value = fu.line_item(_single_row_frame(spaced, value), field, PERIODS[0])
+    camel_value = fu.line_item(_single_row_frame(camel, value), field, PERIODS[0])
+
+    assert spaced_value == pytest.approx(value)
+    assert camel_value == pytest.approx(value)
+    assert not math.isnan(camel_value)
+
+
+def test_a_label_matches_however_the_provider_punctuates_it() -> None:
+    """Case and punctuation are noise; folding them away survives any rename."""
+    frame = _single_row_frame("Total_Revenue", 100.0)
+
+    assert fu.line_item(frame, "revenue", PERIODS[0]) == pytest.approx(100.0)
+
+
+def test_an_exact_match_wins_over_a_folded_one() -> None:
+    """Folding is a fallback, never a first resort, so an exact row is preferred."""
+    frame = pd.DataFrame({PERIODS[0]: [1.0, 2.0]}, index=["Total Revenue", "Total_Revenue"])
+
+    assert fu.line_item(frame, "revenue", PERIODS[0]) == pytest.approx(1.0)
+
+
+def test_an_unknown_label_is_still_missing_rather_than_guessed() -> None:
+    """Tolerance must not become invention: a row that is not there stays NaN."""
+    frame = _single_row_frame("Something Else Entirely", 5.0)
+
+    assert math.isnan(fu.line_item(frame, "revenue", PERIODS[0]))

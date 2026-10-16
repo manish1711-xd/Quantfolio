@@ -1,4 +1,4 @@
-"""Contract and arithmetic tests for ``src.charts`` -- all 44 public figure builders.
+"""Contract and arithmetic tests for ``src.charts`` -- all 59 public figure builders.
 
 A chart module is where a correct number goes to die. The analytics can be
 perfect and the report still lie, because a builder scaled a decimal drawdown
@@ -7,7 +7,7 @@ that blows up only at serialisation time -- in production, after the analysis
 succeeded. So this module tests three separate things.
 
 **1. The universal contract, applied to every name in** ``charts.__all__``.
-Parametrised over all 44 builders, each is asserted to
+Parametrised over all 59 builders, each is asserted to
 
 * return a ``plotly.graph_objects.Figure``;
 * survive ``fig.to_json()`` -- the single cheapest catch for a numpy dtype,
@@ -139,7 +139,7 @@ _BENCH = make_prices(("BMK",), days=1400, start="2019-01-01").iloc[:, 0]
 
 @pytest.fixture(scope="session")
 def book() -> dict[str, Any]:
-    """Every analytics artefact the 52 builders consume, computed once."""
+    """Every analytics artefact the 59 builders consume, computed once."""
     prices = _PRICES
     asset_returns = prices.pct_change().iloc[1:]
     values = rsk.portfolio_value_series(prices, dict(zip(TICKERS, QUANTITIES)))
@@ -251,12 +251,86 @@ def book() -> dict[str, Any]:
         "forecast_run": forecast_run,
         "forecast_nodes": forecast_nodes,
         "forecast_board": forecast_board,
+        # research charts
+        "periods": ["2020", "2021", "2022", "2023", "2024"],
+        "revenue": [100.0, 120.0, 110.0, 135.0, 145.0],
+        "profit": [15.0, 18.0, 16.0, 20.0, 22.0],
+        "common_size_frame": pd.DataFrame(
+            {
+                "2020": [0.80, 0.50, 0.40, 0.30],
+                "2021": [0.78, 0.48, 0.38, 0.28],
+                "2022": [0.81, 0.52, 0.42, 0.32],
+                "2023": [0.79, 0.50, 0.40, 0.30],
+            },
+            index=["Revenue", "Gross profit", "Operating income", "Net income"],
+        ),
+        "sensitivity_rows": [0.08, 0.10, 0.12, 0.14, 0.16],
+        "sensitivity_cols": [0.02, 0.03, 0.04, 0.05],
+        "sensitivity_grid": [
+            [10.0, 12.0, 14.0, 16.0, 18.0],
+            [11.0, 13.0, 15.0, 17.0, 19.0],
+            [12.0, 14.0, 16.0, 18.0, 20.0],
+            [13.0, 15.0, 17.0, 19.0, 21.0],
+            [14.0, 16.0, 18.0, 20.0, 22.0],
+        ],
+        "peer_rows": [
+            {
+                "label": "ROE",
+                "relative": 0.15,
+                "favourable": True,
+                "subject_display": "15.0%",
+                "median_display": "13.0%",
+                "n_peers": 5,
+            },
+            {
+                "label": "P/E",
+                "relative": -0.10,
+                "favourable": False,
+                "subject_display": "18.0x",
+                "median_display": "20.0x",
+                "n_peers": 6,
+            },
+        ],
+        "volatility_series": [0.15, 0.18, 0.16, 0.14, 0.17, 0.19, 0.13, 0.20, 0.15, 0.16],
+        "volatility_current": 0.18,
+        "volatility_median": 0.16,
+        "scorecard_rows": [
+            {
+                "label": "Revenue growth",
+                "influence": 0.05,
+                "score": 0.8,
+                "display": "12.0%",
+                "effective_weight": 0.25,
+            },
+            {
+                "label": "Profit margin",
+                "influence": -0.03,
+                "score": 0.3,
+                "display": "8.5%",
+                "effective_weight": 0.20,
+            },
+            {
+                "label": "Debt ratio",
+                "influence": 0.04,
+                "score": 0.7,
+                "display": "45.0%",
+                "effective_weight": 0.15,
+            },
+        ],
+        "scorecard_composite": 0.45,
+        "sentiment_points": [
+            (0.5, 0.01),
+            (-0.3, -0.02),
+            (0.2, 0.005),
+            (0.1, 0.015),
+            (-0.5, -0.03),
+        ],
     }
 
 
 @pytest.fixture(scope="session")
 def chart_cases(book: dict[str, Any]) -> dict[str, tuple[tuple[Any, ...], dict[str, Any]]]:
-    """``{builder name: (positional args, keyword args)}`` for all 52 charts."""
+    """``{builder name: (positional args, keyword args)}`` for all 59 charts."""
     sim = book["simulation"]
     pca = book["pca"]
     return {
@@ -332,6 +406,35 @@ def chart_cases(book: dict[str, Any]) -> dict[str, tuple[tuple[Any, ...], dict[s
         "range_52w_bar": ((book["range_52w"],), {}),
         "rsi_chart": ((book["rsi"],), {}),
         "volume_chart": ((book["ohlcv"],), {}),
+        # research charts
+        "financial_trend_chart": (
+            (book["periods"], book["revenue"], book["profit"]),
+            {"currency_symbol": ""},
+        ),
+        "common_size_chart": (
+            (book["common_size_frame"],),
+            {},
+        ),
+        "sensitivity_heatmap": (
+            (book["sensitivity_rows"], book["sensitivity_cols"], book["sensitivity_grid"]),
+            {"row_title": "WACC", "col_title": "terminal growth"},
+        ),
+        "peer_median_chart": (
+            (book["peer_rows"],),
+            {},
+        ),
+        "volatility_regime_chart": (
+            (book["volatility_series"],),
+            {"current": book["volatility_current"], "median": book["volatility_median"]},
+        ),
+        "scorecard_breakdown_chart": (
+            (book["scorecard_rows"],),
+            {"composite": book["scorecard_composite"]},
+        ),
+        "sentiment_scatter": (
+            (book["sentiment_points"],),
+            {"rank_ic": float("nan")},
+        ),
     }
 
 
@@ -411,11 +514,11 @@ def _degrade(value: Any, mode: str) -> Any:
 # ---------------------------------------------------------------------------
 # the public surface itself
 # ---------------------------------------------------------------------------
-def test_the_package_exports_fifty_two_figure_builders_and_three_helpers() -> None:
+def test_the_package_exports_fifty_nine_figure_builders_and_three_helpers() -> None:
     """``__all__`` is the page layer's whole vocabulary; drift in it is an API break."""
     assert len(charts.__all__) == len(set(charts.__all__)), "duplicate name in __all__"
     assert NON_BUILDERS <= set(charts.__all__)
-    assert len(CHART_NAMES) == 52, sorted(CHART_NAMES)
+    assert len(CHART_NAMES) == 59, sorted(CHART_NAMES)
     for name in charts.__all__:
         assert hasattr(charts, name), f"{name} is exported but not importable"
     for name in CHART_NAMES:

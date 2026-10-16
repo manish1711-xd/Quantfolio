@@ -31,6 +31,8 @@ from src.config import (
     SEARCH_TTL_SECONDS,
 )
 from src.data import fetcher as dfetch
+from src.data import research as dresearch
+from src.data.news import NewsItem
 from src.models import Quote, SecurityProfile
 
 
@@ -99,6 +101,30 @@ def load_dividends(ticker: str) -> pd.Series:
     return dfetch.fetch_dividends(ticker)
 
 
+@st.cache_data(ttl=HISTORY_TTL_SECONDS, show_spinner=False)
+def load_company_news(
+    ticker: str, name: str = "", limit: int = 40
+) -> tuple[tuple[NewsItem, ...], str]:
+    """Google News headlines for one company, with a notice on failure.
+
+    ``name`` is the company's display name and ``ticker`` the fallback, in that
+    order, because of how the query is built: a quoted multi-word name is a far
+    stronger signal than a bare symbol, and searching for ``POLYCAB.NS`` returns
+    headlines that merely mention the string rather than coverage of the
+    company. See :func:`src.data.news.company_query`.
+
+    Returns ``(items, "")`` on success, or ``(), notice`` on any failure
+    (network error, non-XML response, parse error, staleness). The caller can
+    render the items or show the notice; the tuple is never raised.
+    """
+    from src.data.news import company_query, fetch_company_news
+
+    items = fetch_company_news(company_query(name, ticker), limit=limit)
+    if not items:
+        return (), "No Google News headlines were found."
+    return (items, "")
+
+
 # ---------------------------------------------------------------------------
 # symbol search
 # ---------------------------------------------------------------------------
@@ -113,6 +139,24 @@ def search_online(query: str, limit: int) -> list[dict[str, str]]:
     Reliance's ticker" does not change.
     """
     return dfetch.search_symbols(query, limit)
+
+
+@st.cache_data(ttl=SEARCH_TTL_SECONDS, show_spinner=False)
+def resolve_company(text: str, limit: int = 8, *, online: bool = True) -> dresearch.Resolution:
+    """Name -> ticker **candidates** for the company research page.
+
+    Returns a list of possibilities, never a single answer, and that is a
+    deliberate contract rather than an implementation detail: the provider
+    resolves ``"tcs"`` to Tecsys Inc as readily as to Tata Consultancy
+    Services, so the page must ask the reader which was meant. See
+    :mod:`src.data.research` for the measurements behind that rule.
+
+    ``online=False`` skips the provider entirely. On the search TTL because the
+    answer to "what is Reliance's ticker" is effectively immutable, and the
+    offline half of the resolution reads a 7.5k-row CSV that should not be
+    re-parsed per keystroke.
+    """
+    return dresearch.resolve_candidates(text, limit, online=online)
 
 
 @st.cache_data(ttl=SEARCH_TTL_SECONDS, show_spinner=False)
@@ -172,8 +216,10 @@ def clear_market_cache() -> None:
         load_fx_rates,
         search_online,
         lookup_isins_online,
+        resolve_company,
         load_option_expiries,
         load_option_chain,
+        load_company_news,
     ):
         try:
             fn.clear()
