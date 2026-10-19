@@ -68,11 +68,11 @@ from src.ui.formatters import (
 _QUERY_KEY = "research_query"
 _PICK_KEY = "research_pick"
 
-#: Price window fetched for the risk and ML sections. Three years is the
-#: shortest span that gives a walk-forward forecaster enough folds to report a
-#: fold-to-fold spread rather than a single number, and it is where the
-#: volatility percentile starts to mean something.
-_WINDOW = "3y"
+#: Price window fetched for the risk and ML sections. Five years gives a
+#: walk-forward forecaster enough folds to report a fold-to-fold spread rather
+#: than a single number, and is where the volatility percentile starts to mean
+#: something.
+_WINDOW = "5y"
 
 #: Headlines scored. The measurement below de-clusters to one observation per
 #: day, so a larger pull buys days rather than sample size -- but only up to
