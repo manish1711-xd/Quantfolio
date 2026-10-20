@@ -67,6 +67,11 @@ from src.ui.formatters import (
 #: DCF slider does not silently re-run the resolution and lose the selection.
 _QUERY_KEY = "research_query"
 _PICK_KEY = "research_pick"
+#: The query as it was when the search was last submitted. A form's widgets
+#: only deliver their values on submit, so the eager "clear the pick when the
+#: query changes" behaviour has to live here, at the only moment the script
+#: can compare the new text against the old one.
+_LAST_QUERY_KEY = "research_last_query"
 
 #: Price window fetched for the risk and ML sections. Five years gives a
 #: walk-forward forecaster enough folds to report a fold-to-fold spread rather
@@ -157,19 +162,6 @@ def _tone_for(value: float, invert: bool = False) -> str:
     return "gain" if positive is not invert else "loss"
 
 
-# ---------------------------------------------------------------------------
-# search and resolution
-# ---------------------------------------------------------------------------
-def _on_query_change() -> None:
-    """Drop the previous pick whenever the query changes.
-
-    Without this the radio button would keep pointing at an index that belongs
-    to a different query's option list, which is how a reader ends up reading a
-    report about a company they did not ask for.
-    """
-    st.session_state.pop(_PICK_KEY, None)
-
-
 def _search_box() -> str:
     """The one input the whole page hangs off. Returns the current query text."""
     with st.form("research_search", border=False):
@@ -178,7 +170,6 @@ def _search_box() -> str:
             st.text_input(
                 "Company name or ticker",
                 key=_QUERY_KEY,
-                on_change=_on_query_change,
                 placeholder="Polycab India, RELIANCE.NS, Tata Consultancy...",
                 help=(
                     "Any listed company the bundled universe or the provider knows. "
@@ -188,11 +179,23 @@ def _search_box() -> str:
             )
         with cols[1]:
             submitted = st.form_submit_button("Search", width="stretch")
+    query = str(st.session_state.get(_QUERY_KEY, "") or "").strip()
     if submitted:
         # The button exists to give the Enter key and the mouse the same
         # meaning; the query itself already lives in session state.
-        st.session_state.pop(_PICK_KEY, None)
-    return str(st.session_state.get(_QUERY_KEY, "") or "").strip()
+        #
+        # Drop the previous pick when the query actually changed. A form's
+        # widgets only deliver their values on submit, so the eager version
+        # of this could not live inside the form anyway -- the same
+        # guarantee, reached at the only moment the script can see the new
+        # text. Without it the radio would keep pointing at an index that
+        # belongs to a different query's option list, which is how a reader
+        # ends up reading a report about a company they did not ask for.
+        previous = st.session_state.get(_LAST_QUERY_KEY)
+        st.session_state[_LAST_QUERY_KEY] = query
+        if previous != query:
+            st.session_state.pop(_PICK_KEY, None)
+    return query
 
 
 def _pick_candidate(resolution: Any) -> Candidate | None:
