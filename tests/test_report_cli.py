@@ -706,6 +706,85 @@ def test_verbose_logs_without_printing_credentials(db: Path, capsys: pytest.Capt
 
 
 # ---------------------------------------------------------------------------
+# --test: show how the suite runs, without running it
+# ---------------------------------------------------------------------------
+def test_the_test_flag_lists_the_pytest_and_xdoctest_arguments(
+    db: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """The whole point of the flag: the operator sees the commands."""
+    add(db, weekly())
+
+    code = cli.main(["--db", str(db), "--test"])
+    out = capsys.readouterr().out
+
+    assert code == cli.EXIT_OK
+    assert "pytest:" in out
+    assert "xdoctest:" in out
+    assert "python -m pytest" in out
+    assert "python -m xdoctest" in out
+
+
+def test_the_test_flag_runs_no_tests_and_sends_nothing(
+    db: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """It reports the arguments; it does not act on them."""
+    add(db, weekly())
+
+    cli.main(["--db", str(db), "--test", "--now", "2026-09-02T09:30"])
+
+    assert Sent.messages == []
+    # No tearsheet was built and no schedule was consumed either.
+    assert stored(db)[0].last_sent is None
+    assert "tearsheet" not in capsys.readouterr().out
+
+
+def test_the_test_flag_needs_no_database(
+    tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """Like ``--list``, it must work before anything is configured."""
+    code = cli.main(["--db", str(tmp_path / "nope.db"), "--test"])
+
+    assert code == cli.EXIT_OK
+    assert "pytest:" in capsys.readouterr().out
+
+
+def test_the_test_flag_needs_no_smtp_configuration(
+    db: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    for key in SMTP_ENV:
+        monkeypatch.delenv(key, raising=False)
+
+    code = cli.main(["--db", str(db), "--test"])
+
+    assert code == cli.EXIT_OK
+    assert "xdoctest:" in capsys.readouterr().out
+
+
+def test_the_test_flag_prints_the_exit_codes_a_scheduler_branches_on(
+    db: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """The codes are the contract with cron, so they belong in the listing."""
+    cli.main(["--db", str(db), "--test"])
+    out = capsys.readouterr().out
+
+    assert "Exit codes a scheduler branches on:" in out
+    assert str(cli.EXIT_OK) in out
+    assert str(cli.EXIT_PARTIAL_FAILURE) in out
+    assert str(cli.EXIT_CANNOT_START) in out
+
+
+def test_the_test_flag_never_prints_a_credential(
+    db: Path, capsys: pytest.CaptureFixture
+) -> None:
+    add(db, weekly())
+
+    cli.main(["--db", str(db), "--test", "-v"])
+    captured = capsys.readouterr()
+
+    assert SMTP_ENV["SMTP_PASSWORD"] not in captured.out + captured.err
+
+
+# ---------------------------------------------------------------------------
 # price alerts through the runner
 # ---------------------------------------------------------------------------
 def alert_rule(**overrides: Any) -> wl.WatchItem:

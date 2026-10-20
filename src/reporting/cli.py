@@ -532,6 +532,31 @@ def _print_alerts(store: PortfolioStore) -> None:
             print(f"    last alert {item.last_fired:%d %b %Y %H:%M}")
 
 
+def _print_test_arguments() -> int:
+    """List the pytest and xdoctest arguments, then exit without running anything.
+
+    The ``--test`` flag is for operators who want to see how the suite runs
+    before committing to a run: it prints the commands and nothing else, costs
+    nothing (no imports of Streamlit, pandas, scipy or yfinance), and never
+    touches the database or the network.
+    """
+    print("Test suite arguments (nothing is executed):")
+    print()
+    print("pytest:")
+    print("  python -m pytest tests")
+    print("    addopts: -q --strict-markers --strict-config")
+    print("    markers: slow, network")
+    print()
+    print("xdoctest:")
+    print("  python -m xdoctest src/reporting/cli.py")
+    print()
+    print("Exit codes a scheduler branches on:")
+    print("  0  everything due was sent (or nothing was due)")
+    print("  1  at least one schedule failed -- built, or sent, unsuccessfully")
+    print("  2  the runner could not start: no SMTP settings, unreadable store")
+    return EXIT_OK
+
+
 def _print_list(store: PortfolioStore, now: datetime | None) -> int:
     records = store.load_schedules()
     if not records:
@@ -646,6 +671,14 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Log each step. Never prints credentials.",
     )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help=(
+            "List pytest and xdoctest arguments without executing tests. "
+            "Shows how the test suite would run."
+        ),
+    )
     return parser
 
 
@@ -658,6 +691,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         level=logging.INFO if args.verbose else logging.WARNING,
         format="%(asctime)s %(levelname)s %(message)s",
     )
+
+    if args.test:
+        return _print_test_arguments()
 
     if not Path(args.db).is_file():
         print(
