@@ -1858,3 +1858,88 @@ def test_the_options_panel_refuses_an_unusable_spot(
     assert not at.exception, at.exception
     captions = " ".join(str(c.value) for c in at.caption)
     assert "no current price" in captions.lower()
+
+
+# ---------------------------------------------------------------------------
+# the company-research search box -- the form-callback rule
+# ---------------------------------------------------------------------------
+def _research_script(query, pick=None, last_query=None):
+    """Mount the research page with a query already typed.
+
+    The search box is a ``st.form``, so its text input only delivers its value
+    when the submit button fires. Seeding the session state is therefore the
+    only way to drive it from AppTest, and it is exactly what a real first
+    render does: the box shows the query, the reader presses Search, and the
+    page resolves it.
+    """
+    import streamlit as _st
+
+    from src import charts as _charts
+    from src.ui import session as _session
+    from src.ui import theme as _theme
+
+    _theme.inject_css()
+    _charts.set_mode("dark")
+    _session.init()
+    _st.session_state["research_query"] = query
+    if pick is not None:
+        _st.session_state["research_pick"] = pick
+    if last_query is not None:
+        _st.session_state["research_last_query"] = last_query
+    else:
+        _st.session_state["research_last_query"] = query
+
+    from src.ui.pages import research as _research
+
+    _research.render()
+
+
+
+
+def test_the_research_search_box_has_no_callback_inside_the_form() -> None:
+    """The regression this guards: a widget callback inside ``st.form``.
+
+    Streamlit forbids ``on_change`` / ``on_click`` on anything but the submit
+    button and raises ``StreamlitInvalidFormCallbackError``. The box must
+    carry none, with the query-change logic living in the submit handler
+    instead.
+    """
+    import inspect
+
+    from src.ui.pages import research
+
+    source = inspect.getsource(research._search_box)
+    # Must not contain actual callback parameters (not just comment text).
+    assert "on_change=" not in source
+    assert "on_click=" not in source
+    assert "st.form_submit_button" in source
+
+
+def test_the_research_page_searches_a_named_company(stub_market: None) -> None:
+    """End to end through the real page: a user types a company name and the
+    page resolves it without raising.
+
+    The search box is a ``st.form``, so its text input only delivers its value
+    when the submit button fires. Seeding the session state is the only way to
+    drive it from AppTest, and it is exactly what a real first render does:
+    the box shows the query, the reader presses Search, and the page resolves
+    it.
+    """
+    at = AppTest.from_function(
+        _research_script,
+        kwargs={"query": "Reliance"},
+        default_timeout=120,
+    )
+    at.run()
+    next(b for b in at.button if "Search" in b.label).click().run()
+
+    assert not at.exception, at.exception
+    # The resolver refuses to auto-pick, so the page renders a radio list of
+    # candidates for the reader to choose from. The ticker must be among them.
+    # The resolver refuses to auto-pick, so the page renders a radio list of
+    # candidates for the reader to choose from. The ticker must be among the
+    # options -- the widget's *value* is None until a selection is made.
+    rendered = " ".join(str(o) for r in at.radio for o in r.options) + " ".join(
+        str(c.value) for c in at.caption
+    )
+    assert "RELIANCE.NS" in rendered, rendered[:800]
