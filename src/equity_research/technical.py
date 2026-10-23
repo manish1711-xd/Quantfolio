@@ -199,9 +199,15 @@ def analyze_technicals(
 
     # Beta
     beta_val = np.nan
-    if bench_df is not None and not bench_df.empty and "Close" in bench_df.columns:
-        bench_close = bench_df["Close"].dropna()
-        beta_val = compute_beta(close, bench_close)
+    if bench_df is not None and not bench_df.empty:
+        if isinstance(bench_df, pd.Series):
+            bench_close = bench_df.dropna()
+        elif "Close" in bench_df.columns:
+            bench_close = bench_df["Close"].dropna()
+        else:
+            bench_close = pd.Series(dtype=float)
+        if not bench_close.empty:
+            beta_val = compute_beta(close, bench_close)
 
     current_p = float(close.iloc[-1])
     high_p = float(ohlcv_df["High"].max()) if "High" in ohlcv_df.columns else float(close.max())

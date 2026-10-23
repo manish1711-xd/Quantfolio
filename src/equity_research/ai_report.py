@@ -142,8 +142,18 @@ Our quantitative assessment evaluates the business across historical profitabili
     # 5. Risks & Catalysts
     news_headlines = ""
     if news_items:
-        headlines = [f"- {item.get('title')} *({item.get('source', 'News')})*" for item in news_items[:3]]
-        news_headlines = "\n**Recent Headlines & Catalysts:**\n" + "\n".join(headlines)
+        headlines = []
+        for item in news_items[:3]:
+            if isinstance(item, dict):
+                title = item.get("title", "")
+                src = item.get("source", "News")
+            else:
+                title = getattr(item, "title", "")
+                src = getattr(item, "source", "News")
+            if title:
+                headlines.append(f"- {title} *({src})*")
+        if headlines:
+            news_headlines = "\n**Recent Headlines & Catalysts:**\n" + "\n".join(headlines)
 
     risks = f"""### Investment Risks, Catalysts & Sensitivities
 

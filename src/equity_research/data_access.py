@@ -78,19 +78,35 @@ def fetch_equity_quote(ticker: str) -> tuple[dict[str, Any], list[str]]:
 
     try:
         prof = fetch_profile(ticker)
+        mcap = getattr(prof, "market_cap", None)
+        price = quote_data.get("price")
+
+        shares = getattr(prof, "shares_outstanding", None)
+        if shares is None and mcap is not None and price and not np.isnan(price) and price > 0:
+            shares = mcap / price
+
+        pe = getattr(prof, "pe_ratio", None)
+        if pe is None:
+            pe = getattr(prof, "trailing_pe", None)
+            if pe is None:
+                pe = getattr(prof, "forward_pe", None)
+
+        pb = getattr(prof, "pb_ratio", None)
+        if pb is None:
+            pb = getattr(prof, "price_to_book", None)
+
         quote_data.update({
-            "name": prof.name or ticker,
-            "sector": prof.sector or "Unknown",
-            "industry": prof.industry or "Unknown",
-            "shares_outstanding": prof.shares_outstanding,
-            "pe_ratio": prof.pe_ratio,
-            "pb_ratio": prof.pb_ratio,
-            "beta": prof.beta,
-            "dividend_yield": prof.dividend_yield,
-            "summary": prof.summary or "",
+            "name": getattr(prof, "name", None) or ticker,
+            "sector": getattr(prof, "sector", None) or "Unknown",
+            "industry": getattr(prof, "industry", None) or "Unknown",
+            "market_cap": mcap if mcap is not None else np.nan,
+            "shares_outstanding": shares if shares is not None else np.nan,
+            "pe_ratio": pe if pe is not None else np.nan,
+            "pb_ratio": pb if pb is not None else np.nan,
+            "beta": getattr(prof, "beta", np.nan) if getattr(prof, "beta", None) is not None else np.nan,
+            "dividend_yield": getattr(prof, "dividend_yield", np.nan) if getattr(prof, "dividend_yield", None) is not None else np.nan,
+            "summary": getattr(prof, "summary", "") or "",
         })
-        if prof.shares_outstanding and not np.isnan(quote_data["price"]):
-            quote_data["market_cap"] = prof.shares_outstanding * quote_data["price"]
     except Exception as exc:
         warnings.append(f"Failed to fetch profile details for {ticker}: {exc}")
 
@@ -157,16 +173,28 @@ def fetch_peer_quotes(ticker: str, sector: Optional[str] = None) -> tuple[pd.Dat
         try:
             prof = fetch_profile(peer)
             q = fetch_quote(peer)
-            mcap = (prof.shares_outstanding * q.price) if prof.shares_outstanding and q.price else np.nan
+            mcap = getattr(prof, "market_cap", None)
+            price = getattr(q, "price", np.nan)
+            if mcap is None and getattr(prof, "shares_outstanding", None) and price and not np.isnan(price):
+                mcap = prof.shares_outstanding * price
+
+            pe = getattr(prof, "pe_ratio", None)
+            if pe is None:
+                pe = getattr(prof, "trailing_pe", None) or getattr(prof, "forward_pe", None)
+
+            pb = getattr(prof, "pb_ratio", None)
+            if pb is None:
+                pb = getattr(prof, "price_to_book", None)
+
             rows.append({
                 "ticker": peer,
-                "name": prof.name or peer,
-                "price": q.price,
-                "market_cap": mcap,
-                "pe_ratio": prof.pe_ratio,
-                "pb_ratio": prof.pb_ratio,
-                "beta": prof.beta,
-                "dividend_yield": prof.dividend_yield,
+                "name": getattr(prof, "name", None) or peer,
+                "price": price,
+                "market_cap": mcap if mcap is not None else np.nan,
+                "pe_ratio": pe if pe is not None else np.nan,
+                "pb_ratio": pb if pb is not None else np.nan,
+                "beta": getattr(prof, "beta", np.nan) if getattr(prof, "beta", None) is not None else np.nan,
+                "dividend_yield": getattr(prof, "dividend_yield", np.nan) if getattr(prof, "dividend_yield", None) is not None else np.nan,
             })
         except Exception:
             continue
@@ -202,7 +230,18 @@ def fetch_research_bundle(
     company_name = quote_data.get("name", ticker)
     news_items: list[dict[str, Any]] = []
     try:
-        news_items = fetch_company_news(ticker, company_name)
+        raw_news = fetch_company_news(company_name)
+        for item in raw_news:
+            if hasattr(item, "title"):
+                news_items.append({
+                    "title": item.title,
+                    "link": getattr(item, "link", ""),
+                    "published": str(item.published) if getattr(item, "published", None) else "",
+                    "source": getattr(item, "source", "News"),
+                    "summary": getattr(item, "summary", ""),
+                })
+            elif isinstance(item, dict):
+                news_items.append(item)
     except Exception as exc:
         warnings.append(f"News fetch error for {ticker}: {exc}")
 
