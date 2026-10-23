@@ -15,4 +15,5 @@ __all__ = [
     "ai_report",
     "export",
     "data_access",
+    "history",
 ]

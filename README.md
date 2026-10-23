@@ -332,6 +332,15 @@ Full detail in **[The machine-learning forecaster](#the-machine-learning-forecas
 below.
 
 ### Research & export
+- **AI-Powered Stock Equity Research Report Generator** (`src/equity_research/` & `src/ui/pages/equity_research.py`):
+  - **Single-ticker institutional tearsheet** — enter any stock ticker (e.g., `RELIANCE.NS`, `TCS.NS`, `HDFCBANK.NS`, `AAPL`) to generate a complete equity research report suitable for an Investment Analyst portfolio.
+  - **Comprehensive Fundamental Analysis** — gross margin, operating margin, net profit margin, EPS, ROE, ROCE, Debt/Equity, Debt/Asset, and Free Cash Flow extracted across annual income, balance sheet, and cash flow statements with zero fabricated numbers.
+  - **Technical & Risk Engine** — SMA (20, 50, 200), EMA (20, 50), 14-period Wilder exponential RSI (`ewm(alpha=1/period, adjust=False)`), MACD (12, 26, 9), sample annualized volatility (`ddof=1`), Beta vs. benchmark (^NSEI/^GSPC), Sharpe ratio, and maximum drawdown.
+  - **5-Year DCF Valuation & Sensitivity Matrix** — geometric cash flow forecasting, WACC discounting, Gordon Growth terminal value `FCF₅ × (1+g) / (WACC - g)`, enterprise-to-equity value bridge, 2D sensitivity matrix heatmap across discount and growth rates, and Bull/Base/Bear scenario bands.
+  - **Sector Peer Comparison** — automated comparative valuation against industry peers (P/E, P/B, Market Cap), sector averages, and target company percentile rankings.
+  - **Automated Research Narrative** — institutional report structure covering Executive Summary, Company Overview, Financial Analysis, Valuation, Risks & Catalysts, Conclusion, Data Sources, and Modeling Assumptions (with optional LLM enhancement via Anthropic/OpenAI or transparent deterministic analyst templates).
+  - **Export to PDF & Excel** — standalone CSS-styled tearsheet convertible to PDF via headless browser, and formatted multi-worksheet Excel financial models with formulas, percentages, currency formats, and sensitivity grids.
+  - **SQLite Research History** — saved research teardowns persisted to `data/quantfolio.db` with reload, inspect, and delete capabilities.
 - Per-security deep dive: fundamentals, 52-week positioning, candlesticks with Bollinger bands,
   **Wilder RSI**, MACD
 - **Fundamental quality scores** — **Piotroski F-Score** (9 signals), **Altman Z-Score**

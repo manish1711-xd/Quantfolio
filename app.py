@@ -50,6 +50,7 @@ def _pages() -> dict[str, list]:
     from src.ui.pages import (
         benchmark,
         correlation,
+        equity_research,
         forecast,
         holdings,
         news,
@@ -91,6 +92,7 @@ def _pages() -> dict[str, list]:
             page(rebalance.render, "Rebalance", ":material/balance:", "rebalance"),
         ],
         "Research": [
+            page(equity_research.equity_research_page, "Equity Research", ":material/analytics:", "equity_research", default=True),
             page(research.render, "Company research", ":material/manage_search:", "research"),
             page(security.render, "Security deep dive", ":material/query_stats:", "security"),
             page(forecast.render, "Price forecast", ":material/auto_graph:", "forecast"),
