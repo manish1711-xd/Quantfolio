@@ -131,7 +131,8 @@ def calculate_dcf_valuation(
     low_tv = compute_terminal_value(low_proj[-1], low_wacc, term_g)
     low_ev = low_pv + (low_tv / ((1.0 + low_wacc) ** years)) if not np.isnan(low_tv) else low_pv
     low_eq = max(0.0, low_ev - net_debt)
-    fair_low = float(low_eq / inputs.shares_outstanding) if (inputs.shares_outstanding and inputs.shares_outstanding > 0) else None
+    has_shares = inputs.shares_outstanding is not None and not np.isnan(inputs.shares_outstanding) and inputs.shares_outstanding > 0
+    fair_low = float(low_eq / inputs.shares_outstanding) if has_shares else None
 
     # High: Growth + 1%, WACC - 1%
     high_wacc = max(term_g + 0.005, inputs.wacc - 0.01)
@@ -141,7 +142,7 @@ def calculate_dcf_valuation(
     high_tv = compute_terminal_value(high_proj[-1], high_wacc, term_g)
     high_ev = high_pv + (high_tv / ((1.0 + high_wacc) ** years)) if not np.isnan(high_tv) else high_pv
     high_eq = max(0.0, high_ev - net_debt)
-    fair_high = float(high_eq / inputs.shares_outstanding) if (inputs.shares_outstanding and inputs.shares_outstanding > 0) else None
+    fair_high = float(high_eq / inputs.shares_outstanding) if has_shares else None
 
     # Recommendation
     recommendation = "Hold"

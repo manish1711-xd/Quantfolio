@@ -393,6 +393,10 @@ def render() -> None:
         return
 
     quote = bundle["quote"]
+    price = quote.get("price")
+    if not quote or price is None or np.isnan(price) or price <= 0:
+        st.error(f"Could not retrieve a valid price or quote for ticker '{ticker_input}'. Please check the symbol (e.g. RELIANCE.NS, AAPL, TCS.NS) and ensure your connection or ticker format is valid.")
+        return
     statements = bundle["statements"]
     ohlcv = bundle["ohlcv"]
     bench_hist = bundle["bench_hist"]
