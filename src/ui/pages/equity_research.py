@@ -51,6 +51,7 @@ from src.equity_research.models import (
 )
 from src.equity_research.peer_comparison import analyze_peer_comparison
 from src.equity_research.technical import analyze_technicals
+from src.equity_research.market_segments import compute_market_segment_ratios, get_nse_market_snapshot
 from src.ui import components as ui
 from src.ui import theme as ui_theme
 from src.ui.formatters import DASH, fmt_date, fmt_money, fmt_num, fmt_ratio_pct
@@ -586,6 +587,7 @@ def render() -> None:
         "📊 Fundamentals & Ratios",
         "📈 Technicals & Risk",
         "👥 Peer Multiples",
+        "🌐 NSE Market Segments",
         "📚 Saved History",
     ])
 
@@ -728,8 +730,53 @@ def render() -> None:
         else:
             ui.empty_state("No Peer Data Available", "Peer comparison requires sector catalog data. None found for this listing.", icon="👥")
 
-    # Tab 6: Saved Research History
+    # Tab 6: NSE Market Segments & Ratios
     with tabs[5]:
+        st.markdown("### NSE Market Segments & Turnover Ratios")
+        st.caption("Aggregated market statistics, turnover share, and segment ratios across all NSE listed equities.")
+
+        df_nse, meta_nse = get_nse_market_snapshot()
+        seg_df = compute_market_segment_ratios(df_nse)
+
+        kpi_nse = [
+            {"label": "Total NSE Listed Equities", "value": f"{meta_nse.get('total_nse_stocks', 0):,}"},
+            {"label": "Total Traded Turnover", "value": f"₹{meta_nse.get('total_turnover', 0.0):,.0f}"},
+            {"label": "Mapped Segments", "value": f"{len(seg_df):,}"},
+        ]
+        ui.stat_grid(kpi_nse, columns=3)
+
+        if not seg_df.empty:
+            st.divider()
+            st.markdown("#### Market Segment Turnover Share (%)")
+            fig_seg = go.Figure(
+                go.Bar(
+                    x=seg_df["sector"],
+                    y=seg_df["turnover_share_pct"],
+                    marker_color="#0EA5E9",
+                    text=[f"{v:.1f}%" for v in seg_df["turnover_share_pct"]],
+                    textposition="outside",
+                )
+            )
+            fig_seg.update_layout(
+                xaxis_title="Market Segment / Sector",
+                yaxis_title="Turnover Share (%)",
+                margin=dict(l=10, r=10, t=30, b=10),
+            )
+            ui.chart(ch_theme.apply(fig_seg))
+
+            st.markdown("#### Segment Breakdown Table")
+            disp_seg = seg_df.copy()
+            disp_seg["total_turnover"] = disp_seg["total_turnover"].apply(lambda v: f"₹{v:,.0f}")
+            disp_seg["mean_turnover"] = disp_seg["mean_turnover"].apply(lambda v: f"₹{v:,.0f}")
+            disp_seg["median_turnover"] = disp_seg["median_turnover"].apply(lambda v: f"₹{v:,.0f}")
+            disp_seg["max_turnover"] = disp_seg["max_turnover"].apply(lambda v: f"₹{v:,.0f}")
+            disp_seg["turnover_share_pct"] = disp_seg["turnover_share_pct"].apply(lambda v: f"{v:.2f}%")
+            ui.dataframe(disp_seg, height=300)
+        else:
+            ui.empty_state("No Segment Data", "Could not load NSE market snapshot.", icon="📊")
+
+    # Tab 7: Saved Research History
+    with tabs[6]:
         st.markdown("### Saved Equity Research Reports")
         history = load_research_history()
         if history:
