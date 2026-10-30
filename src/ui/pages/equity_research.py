@@ -250,7 +250,9 @@ def _build_dcf_cashflow_chart(val: ValuationResult, curr_symbol: str) -> go.Figu
     if not val.dcf_interpolated:
         return fig
 
-    labels = [k.replace("_", " ").title() for k in val.dcf_interpolated.keys()]
+    # Map keys like "year_1", "year_2", etc. to calendar years starting at 2024
+    year_mapping = {"year_1": "2024", "year_2": "2025", "year_3": "2026", "year_4": "2027", "year_5": "2028"}
+    labels = [year_mapping.get(k, k.replace("_", " ").title()) for k in val.dcf_interpolated.keys()]
     values = list(val.dcf_interpolated.values())
 
     fig.add_trace(
@@ -265,7 +267,7 @@ def _build_dcf_cashflow_chart(val: ValuationResult, curr_symbol: str) -> go.Figu
 
     fig.update_layout(
         title=dict(text="5-Year Projected Cash Flow Present Values (PV)"),
-        xaxis_title="Projection Horizon",
+        xaxis_title="Calendar Year",
         yaxis_title="Discounted PV",
         margin=dict(l=10, r=10, t=40, b=10),
     )
