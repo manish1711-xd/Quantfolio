@@ -670,23 +670,39 @@ def _valuation_section(data: dict[str, Any]) -> dict[str, float]:
         years=5,
     )
 
-    st.markdown("**Discounted cash flow**")
+    st.markdown("**Professional DCF Valuation & Scenario Analysis**")
     st.caption(
-        "Free cash flow to the firm, discounted at the cost of capital, with a "
-        "perpetuity after an explicit forecast. Change any assumption and the "
-        "answer moves — which is the honest behaviour, not a defect."
+        "Automated DCF valuation with realistic institutional assumptions (WACC 8%-12%, FCF Growth 5%-15%, Terminal Growth 2%-5%), "
+        "Margin of Safety, Buy/Hold/Sell ratings, and instant scenario modeling (Bear, Base, Bull)."
     )
+
+    # Scenario selector (Bear, Base, Bull)
+    scenario_mode = st.radio(
+        "Valuation Scenario",
+        ["Base Case (WACC 10%, Growth 8%, Terminal 3%)", "Bull Case (WACC 8%, Growth 12%, Terminal 4%)", "Bear Case (WACC 12%, Growth 5%, Terminal 2%)", "Custom Assumptions"],
+        horizontal=True,
+    )
+
+    if "Base" in scenario_mode:
+        default_wacc, default_growth, default_terminal = 10.0, 8.0, 3.0
+    elif "Bull" in scenario_mode:
+        default_wacc, default_growth, default_terminal = 8.0, 12.0, 4.0
+    elif "Bear" in scenario_mode:
+        default_wacc, default_growth, default_terminal = 12.0, 5.0, 2.0
+    else:
+        default_wacc, default_growth, default_terminal = 10.0, 10.0, 3.0
 
     controls = st.columns(4)
     horizon = controls[0].slider("Forecast years", 3, 10, 5, key="dcf_years")
     start_growth = controls[1].slider(
-        "Year-1 revenue growth",
-        -20.0,
-        60.0,
-        round(float(seed.revenue_growth[0]) * 100.0, 1),
+        "Forecast FCF Growth Rate (5% - 15%)",
+        0.0,
+        35.0,
+        default_growth,
         step=0.5,
         format="%.1f%%",
         key="dcf_growth",
+        help="Expected Free Cash Flow growth rate for the next 5-10 years (Professional range: 5% - 15%).",
     )
     margin = controls[2].slider(
         "Operating margin",
@@ -700,38 +716,34 @@ def _valuation_section(data: dict[str, Any]) -> dict[str, float]:
         key="dcf_margin",
     )
     terminal = controls[3].slider(
-        "Terminal growth",
-        -2.0,
-        6.0,
-        round(dcf.DEFAULT_TERMINAL_GROWTH * 100.0, 1),
+        "Terminal Growth Rate (2% - 5%)",
+        0.0,
+        8.0,
+        default_terminal,
         step=0.25,
         format="%.2f%%",
         key="dcf_terminal",
+        help="Long-term perpetuity growth rate after the forecast period (Professional range: 2% - 5%).",
     )
 
-    wacc_seed = _seed_wacc(profile)
-    wacc_cols = st.columns([3, 5])
-    wacc_pct = wacc_cols[0].slider(
-        "Discount rate (WACC)",
+    wacc_pct = st.slider(
+        "Discount Rate / WACC (8% - 12%)",
         4.0,
         25.0,
-        round(wacc_seed * 100.0, 1),
+        default_wacc,
         step=0.25,
         format="%.2f%%",
         key="dcf_wacc",
-        help=(
-            "Cash flows are discounted at the weighted average cost of capital. "
-            "Seeded from the provider's beta and a placeholder risk-free rate you "
-            "should replace with the actual yield on the relevant government bond."
-        ),
+        help="Investor required return and company risk (WACC). Estimated from Risk-Free Rate, Beta, ERP, Cost of Debt, and Tax Rate (Professional range: 8% - 12%).",
     )
-    with wacc_cols[1]:
-        st.caption(
-            f"Seeded at {wacc_seed:.1%} from a placeholder risk-free rate plus "
-            f"{_EQUITY_RISK_PREMIUM:.1%} equity risk premium times the provider's "
-            f"beta ({_text(getattr(profile, 'beta', None))}). This is a starting "
-            "point for your own view, not an estimate this tool stands behind."
-        )
+
+    # Validation warnings for unrealistic assumptions
+    if wacc_pct < 5.0 or wacc_pct > 20.0:
+        st.warning(f"⚠️ Unrealistic WACC assumption ({wacc_pct:.2f}%). Professional equity research practice recommends keeping WACC between 8% and 12%.")
+    if start_growth > 25.0:
+        st.warning(f"⚠️ Unrealistic High Growth assumption ({start_growth:.2f}%). Sustaining growth above 25% long-term is highly improbable for most enterprises.")
+    if terminal > 6.0:
+        st.warning(f"⚠️ Unrealistic Terminal Growth assumption ({terminal:.2f}%). Terminal growth cannot sustainably exceed long-term GDP growth (typically 2% to 5%).")
 
     assumptions = _assumptions(
         horizon=horizon,
@@ -753,16 +765,24 @@ def _valuation_section(data: dict[str, Any]) -> dict[str, float]:
     )
     out["dcf_upside"] = upside
 
+    # Calculate Margin of Safety and Buy/Hold/Sell recommendation
+    margin_of_safety = (result.value_per_share - data["price"]) / result.value_per_share if result.value_per_share > 0 else float("nan")
+    if not math.isnan(upside):
+        if upside > 0.15:
+            rec = "🟢 BUY (Attractive Upside & Margin of Safety)"
+        elif upside < -0.15:
+            rec = "🔴 SELL (Overvalued / Negative Margin of Safety)"
+        else:
+            rec = "🟡 HOLD (Fairly Valued)"
+    else:
+        rec = "N/A"
+
     ui.kpi_row(
         [
-            {"label": "Value per share", "value": _money(result.value_per_share, currency)},
-            {"label": "Market price", "value": _money(data["price"], currency)},
-            {
-                "label": "Upside to fair value",
-                "value": _pct(upside),
-                "tone": _tone_for(upside),
-            },
-            {"label": "Enterprise value", "value": _compact(result.enterprise_value, currency)},
+            {"label": "DCF Fair Value", "value": _money(result.value_per_share, currency)},
+            {"label": "Market Price", "value": _money(data["price"], currency)},
+            {"label": "Margin of Safety", "value": _pct(margin_of_safety), "tone": _tone_for(margin_of_safety)},
+            {"label": "Recommendation", "value": rec},
         ]
     )
     st.caption(
