@@ -103,18 +103,23 @@ Our quantitative assessment evaluates the business across historical profitabili
     if fundamental and fundamental.missing_fields:
         fin_status = f"\n*Data Note: The following items were absent from public filings: {', '.join(fundamental.missing_fields)}.*"
 
-    fin_analysis = f"""### Fundamental & Financial Statement Analysis
+    fin_analysis = f"""### Fundamental & Financial Statement Analysis (Sales, Gross Profit, EBITDA, EBIT, Net Profit)
 
-| Metric | Current Period | Status / Benchmark |
+| Financial Statement Metric | Current Period / Latest | Analytical Significance |
 | :--- | :--- | :--- |
-| **Gross Margin** | {_format_pct(fundamental.gross_margin if fundamental else None)} | Core operational efficiency |
+| **Sales (Revenue)** | {_format_curr(fundamental.revenue_latest if fundamental and not np.isnan(fundamental.revenue_latest) else getattr(fundamental, 'revenue_latest', np.nan), curr)} | Top-line scale & demand velocity |
+| **Gross Profit** | {_format_curr(getattr(fundamental, 'gross_profit_latest', np.nan), curr)} | Pricing power & direct cost efficiency |
+| **EBITDA** | {_format_curr(getattr(fundamental, 'ebitda_latest', np.nan), curr)} | Operating cash generation prior to D&A |
+| **Operating Profit (EBIT)** | {_format_curr(getattr(fundamental, 'ebit_latest', np.nan), curr)} | Core operating profitability |
+| **Net Profit (PAT)** | {_format_curr(fundamental.profit_latest if fundamental else None, curr)} | Bottom-line shareholder earnings |
+| **Gross Margin** | {_format_pct(fundamental.gross_margin if fundamental else None)} | Direct cost ratio |
 | **Operating Margin** | {_format_pct(fundamental.operating_margin if fundamental else None)} | Operating leverage |
-| **Net Profit Margin** | {_format_pct(fundamental.net_margin if fundamental else None)} | Bottom-line profitability |
+| **Net Profit Margin** | {_format_pct(fundamental.net_margin if fundamental else None)} | Net conversion efficiency |
 | **Earnings Per Share (EPS)** | {_format_curr(fundamental.eps if fundamental else None, curr)} | Diluted/Basic per share |
 | **Return on Equity (ROE)** | {_format_pct(fundamental.roe if fundamental else None)} | Shareholder capital efficiency |
 | **Return on Capital Employed (ROCE)** | {_format_pct(fundamental.roce if fundamental else None)} | Total capital return |
 | **Debt-to-Equity** | {_format_num(fundamental.debt_to_equity if fundamental else None, 2)}x | Solvency / Financial leverage |
-| **Free Cash Flow** | {_format_curr(fundamental.free_cash_flow if fundamental else None, curr)} | Operating Cash Flow less CapEx |
+| **Free Cash Flow (FCF)** | {_format_curr(fundamental.free_cash_flow if fundamental else None, curr)} | Operating Cash Flow less CapEx |
 {fin_status}
 """
 
@@ -123,15 +128,18 @@ Our quantitative assessment evaluates the business across historical profitabili
     if valuation and valuation.status_notes:
         dcf_notes = "\n*Model Notes:* " + "; ".join(valuation.status_notes)
 
-    val_section = f"""### Valuation & Intrinsic Pricing Models
+    val_section = f"""### Valuation & Multi-Model DCF / Intrinsic Pricing (FCFF, FCFE, DDM, Gordon Growth)
 
-**Methodology: 5-Year DCF / Free Cash Flow to Firm (FCFF) Model**
-- **WACC Applied:** {_format_pct(valuation.wacc_used if valuation else None)}
-- **Terminal Growth Rate:** 3.0% (conservative long-term GDP inflation benchmark)
-- **Enterprise Value:** {_format_curr(valuation.enterprise_value if valuation else None, curr)}
-- **Equity Value:** {_format_curr(valuation.equity_value if valuation else None, curr)}
-- **Intrinsic Value Per Share:** **{_format_curr(valuation.intrinsic_value if valuation else None, curr)}**
-- **Sensitivity Band:** Low {_format_curr(valuation.fair_value_low if valuation else None, curr)} | High {_format_curr(valuation.fair_value_high if valuation else None, curr)}
+**Methodology Reconciliation: Multi-Model Valuation Suite**
+- **Current Market Price (CMP):** {_format_curr(price, curr)}
+- **FCFF Intrinsic Value (Firm Cash Flow / WACC):** {_format_curr(valuation.intrinsic_value if valuation else None, curr)}
+- **FCFE Intrinsic Value (Equity Cash Flow / Ke):** {_format_curr(getattr(valuation, 'fcfe_value', valuation.intrinsic_value if valuation else None), curr)}
+- **Dividend Discount Model (DDM / Gordon):** {_format_curr(getattr(valuation, 'ddm_value', valuation.intrinsic_value if valuation else None), curr)}
+- **Gordon Growth Perpetuity Value:** {_format_curr(getattr(valuation, 'gordon_value', valuation.intrinsic_value if valuation else None), curr)}
+- **Blended Intrinsic Value:** **{_format_curr(valuation.intrinsic_value if valuation else None, curr)}**
+- **Premium / Discount Value (Implied Upside vs CMP):** **{f"{((valuation.intrinsic_value - price) / price) * 100:+.1f}%" if valuation and valuation.intrinsic_value and price and price > 0 else "—"}**
+- **WACC Applied:** {_format_pct(valuation.wacc_used if valuation else None)} | **Terminal Growth Rate:** 3.0%
+- **Sensitivity Valuation Band:** Low {_format_curr(valuation.fair_value_low if valuation else None, curr)} – High {_format_curr(valuation.fair_value_high if valuation else None, curr)}
 {dcf_notes}
 
 **Relative Multiples (P/E & P/B vs Sector Peers):**

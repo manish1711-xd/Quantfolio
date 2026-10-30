@@ -68,13 +68,21 @@ __all__ = [
     "WaccResult",
     "DcfAssumptions",
     "DcfResult",
+    "FcfeResult",
+    "DdmResult",
+    "MultiModelResult",
     "SensitivityGrid",
     "ReverseDcfResult",
     "cost_of_equity",
     "after_tax_cost_of_debt",
     "wacc",
     "forecast_fcff",
+    "forecast_fcfe",
     "run_dcf",
+    "run_fcfe",
+    "run_ddm",
+    "run_gordon",
+    "run_multi_model",
     "sensitivity_grid",
     "reverse_dcf",
     "default_assumptions",
@@ -339,6 +347,12 @@ class DcfAssumptions:
     da_pct_revenue: float = 0.04
     capex_pct_revenue: float = 0.05
     nwc_pct_incremental_revenue: float = 0.10
+    #: Gross margin for the P&L bridge (Sales → Gross Profit). NaN omits the line.
+    gross_margin: float = _NAN
+    #: Pretax cost of debt used when bridging FCFF → FCFE (interest charge).
+    pretax_cost_of_debt: float = 0.08
+    #: Share of incremental NWC funded by net borrowing (0 = all-equity funded).
+    net_borrowing_pct_nwc: float = 0.0
     wacc_value: float = 0.12
     terminal_growth: float = DEFAULT_TERMINAL_GROWTH
     exit_ebitda_multiple: float = _NAN
@@ -409,10 +423,23 @@ def forecast_fcff(
     if math.isnan(revenue):
         return {}, _NAN, _NAN
 
-    columns = ("revenue", "ebit", "nopat", "depreciation", "capex", "nwc_change", "fcff")
+    columns = (
+        "revenue",
+        "sales",
+        "gross_profit",
+        "ebitda",
+        "ebit",
+        "nopat",
+        "net_profit",
+        "depreciation",
+        "capex",
+        "nwc_change",
+        "fcff",
+    )
     table: dict[str, list[float]] = {c: [] for c in columns}
 
     prior = revenue
+    gross_m = _num(assumptions.gross_margin)
     for index in range(assumptions.horizon):
         growth = _num(assumptions.revenue_growth[index])
         margin = _num(assumptions.ebit_margin[index])
@@ -435,9 +462,18 @@ def forecast_fcff(
         else:
             fcff = _NAN
 
+        gross_profit = year_revenue * gross_m if _ok(year_revenue, gross_m) else _NAN
+        ebitda = ebit + da if _ok(ebit, da) else _NAN
+        # Unlevered net profit proxy on the FCFF path (interest is peeled in FCFE).
+        net_profit = nopat
+
         table["revenue"].append(year_revenue)
+        table["sales"].append(year_revenue)
+        table["gross_profit"].append(gross_profit)
+        table["ebitda"].append(ebitda)
         table["ebit"].append(ebit)
         table["nopat"].append(nopat)
+        table["net_profit"].append(net_profit)
         table["depreciation"].append(da)
         table["capex"].append(capex)
         table["nwc_change"].append(nwc)
@@ -913,3 +949,393 @@ def historical_rates(statements: object, field_name: str = "revenue") -> tuple[f
     shifts = values.shift(1)
     rates = (values - shifts) / shifts.abs()
     return tuple(_num(v) for v in rates.dropna())
+
+
+# ---------------------------------------------------------------------------
+# Gordon Growth Model (standalone perpetuity)
+# ---------------------------------------------------------------------------
+def run_gordon(
+    base_cash_flow: float,
+    growth_rate: float,
+    discount_rate: float,
+) -> float:
+    """Gordon Growth perpetuity: ``CF_0 x (1 + g) / (r - g)``.
+
+    Returns NaN when the discount rate does not clear terminal growth by at
+    least :data:`MIN_WACC_SPREAD`, or when any input is missing. This is the
+    same terminal formula used inside FCFF/FCFE, exposed so a report can quote
+    a one-stage intrinsic value without running a full multi-year forecast.
+    """
+    cf, g, r = _num(base_cash_flow), _num(growth_rate), _num(discount_rate)
+    if not _ok(cf, g, r):
+        return _NAN
+    if r <= g + MIN_WACC_SPREAD:
+        return _NAN
+    return cf * (1.0 + g) / (r - g)
+
+
+# ---------------------------------------------------------------------------
+# Dividend Discount Model (Gordon Growth form)
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class DdmResult:
+    """One-stage (Gordon) dividend discount valuation."""
+
+    value_per_share: float = _NAN
+    next_dividend: float = _NAN
+    growth_rate: float = _NAN
+    cost_of_equity: float = _NAN
+    current_price: float = _NAN
+    premium_to_price: float = _NAN
+    notices: tuple[str, ...] = field(default_factory=tuple)
+
+    @property
+    def ok(self) -> bool:
+        return not math.isnan(self.value_per_share) and self.value_per_share > 0
+
+    @property
+    def upside(self) -> float:
+        return self.premium_to_price
+
+
+def run_ddm(
+    current_dividend: float,
+    growth_rate: float,
+    cost_of_equity: float,
+    current_price: float = _NAN,
+) -> DdmResult:
+    """Gordon Growth DDM: ``P_0 = D_0 x (1 + g) / (Ke - g)``.
+
+    Prefer this for banks and other financials where deposits are working
+    capital, not investable debt, so FCFF/EBITDA frameworks mis-state the firm.
+    A zero or negative dividend returns NaN with a notice rather than a fake
+    zero price.
+    """
+    d0, g, ke, px = (
+        _num(current_dividend),
+        _num(growth_rate),
+        _num(cost_of_equity),
+        _num(current_price),
+    )
+    notices: list[str] = []
+    if not _ok(d0) or d0 <= 0:
+        return DdmResult(
+            current_price=px,
+            growth_rate=g,
+            cost_of_equity=ke,
+            notices=("Dividend is missing or non-positive; DDM cannot be applied.",),
+        )
+    if not _ok(g, ke):
+        return DdmResult(
+            current_price=px,
+            notices=("Growth rate or cost of equity is missing.",),
+        )
+    if ke <= g + MIN_WACC_SPREAD:
+        return DdmResult(
+            current_price=px,
+            growth_rate=g,
+            cost_of_equity=ke,
+            notices=(
+                f"Cost of equity {ke:.1%} must exceed dividend growth {g:.1%} "
+                "by more than the minimum spread.",
+            ),
+        )
+
+    next_div = d0 * (1.0 + g)
+    value = next_div / (ke - g)
+    premium = _div(value, px) - 1.0 if _ok(px) and px > 0 else _NAN
+    if not math.isnan(premium) and abs(premium) > 0.5:
+        notices.append(
+            f"DDM implies a {premium:+.0%} gap vs the market price — check payout "
+            "sustainability and the growth assumption before trusting the number."
+        )
+    return DdmResult(
+        value_per_share=value,
+        next_dividend=next_div,
+        growth_rate=g,
+        cost_of_equity=ke,
+        current_price=px,
+        premium_to_price=premium,
+        notices=tuple(notices),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Free Cash Flow to Equity (FCFE)
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class FcfeResult:
+    """Equity value from FCFE discounted at the cost of equity."""
+
+    value_per_share: float = _NAN
+    equity_value: float = _NAN
+    pv_explicit: float = _NAN
+    pv_terminal: float = _NAN
+    terminal_value: float = _NAN
+    fcfe_final: float = _NAN
+    cost_of_equity: float = _NAN
+    terminal_growth: float = _NAN
+    shares: float = _NAN
+    current_price: float = _NAN
+    premium_to_price: float = _NAN
+    forecast: dict[str, list[float]] = field(default_factory=dict)
+    notices: tuple[str, ...] = field(default_factory=tuple)
+
+    @property
+    def ok(self) -> bool:
+        return not math.isnan(self.value_per_share) and self.value_per_share > 0
+
+    @property
+    def upside(self) -> float:
+        return self.premium_to_price
+
+
+def forecast_fcfe(
+    assumptions: DcfAssumptions,
+    base_revenue: float,
+    net_debt: float = 0.0,
+) -> tuple[dict[str, list[float]], float, float]:
+    """Project free cash flow to equity from the FCFF bridge.
+
+    ``FCFE = FCFF - after-tax interest + net borrowing``.
+
+    Interest is charged on ``max(net_debt, 0)`` at ``pretax_cost_of_debt``.
+    Net borrowing defaults to a fraction of incremental NWC (often zero),
+    which is the conservative all-equity-funded growth case. Negative FCFE
+    years are kept — equity holders can face cash calls — and only become a
+    notice at the valuation step when the terminal year itself is non-positive.
+    """
+    table, final_revenue, _ = forecast_fcff(assumptions, base_revenue)
+    if not table:
+        return {}, _NAN, _NAN
+
+    tax = _num(assumptions.tax_rate)
+    kd = _num(assumptions.pretax_cost_of_debt)
+    debt = max(_num(net_debt), 0.0) if _ok(_num(net_debt)) else 0.0
+    interest = debt * kd if _ok(kd) else _NAN
+    after_tax_interest = interest * (1.0 - tax) if _ok(interest, tax) else _NAN
+    borrow_pct = _num(assumptions.net_borrowing_pct_nwc)
+
+    table["interest_after_tax"] = []
+    table["net_borrowing"] = []
+    table["fcfe"] = []
+    table["net_profit_levered"] = []
+
+    for index, fcff in enumerate(table["fcff"]):
+        fcff_n = _num(fcff)
+        nwc = _num(table["nwc_change"][index])
+        nopat = _num(table["nopat"][index])
+        borrowing = nwc * borrow_pct if _ok(nwc, borrow_pct) else 0.0
+        if _ok(fcff_n, after_tax_interest):
+            fcfe = fcff_n - after_tax_interest + borrowing
+        else:
+            fcfe = _NAN
+        levered_ni = nopat - after_tax_interest if _ok(nopat, after_tax_interest) else _NAN
+
+        table["interest_after_tax"].append(after_tax_interest)
+        table["net_borrowing"].append(borrowing)
+        table["fcfe"].append(fcfe)
+        table["net_profit_levered"].append(levered_ni)
+        # Prefer levered net profit on the FCFE path when interest is known.
+        if _ok(levered_ni):
+            table["net_profit"][index] = levered_ni
+
+    final_fcfe = table["fcfe"][-1] if table["fcfe"] else _NAN
+    return table, final_revenue, final_fcfe
+
+
+def run_fcfe(
+    assumptions: DcfAssumptions,
+    financials: CompanyFinancials,
+    cost_of_equity: float,
+    effective_tax_rate: float = _NAN,
+) -> FcfeResult:
+    """Value equity by discounting FCFE at the cost of equity.
+
+    Unlike FCFF, the result is already an equity value — net debt is not
+    subtracted again. The discount rate is ``cost_of_equity``, never WACC.
+    """
+    head: list[str] = []
+    observed_tax = _num(effective_tax_rate)
+    if _ok(observed_tax) and observed_tax != _num(assumptions.tax_rate):
+        assumptions = _replace(assumptions, tax_rate=observed_tax)
+        head.append(
+            f"FCFE uses the {observed_tax:.1%} effective tax rate from the accounts."
+        )
+
+    ke = _num(cost_of_equity)
+    growth = _num(assumptions.terminal_growth)
+    if math.isnan(ke):
+        return FcfeResult(notices=(*head, "Cost of equity is missing."))
+    if math.isnan(growth):
+        return FcfeResult(notices=(*head, "Terminal growth is missing."))
+    if ke <= growth + MIN_WACC_SPREAD:
+        return FcfeResult(
+            notices=(
+                *head,
+                f"Cost of equity {ke:.1%} must exceed terminal growth {growth:.1%}.",
+            )
+        )
+    if math.isnan(_num(financials.shares)) or _num(financials.shares) <= 0:
+        return FcfeResult(notices=(*head, "Share count is missing."))
+    if math.isnan(_num(financials.base_revenue)):
+        return FcfeResult(notices=(*head, "Revenue is missing."))
+
+    # Horizon / margin shape still matters even though we ignore wacc_value here.
+    shape_problems = [
+        p
+        for p in assumptions.problems
+        if "discount rate" not in p.lower() and "terminal growth" not in p.lower()
+    ]
+    # Re-check growth/margin lengths without the WACC gate.
+    if assumptions.horizon == 0:
+        shape_problems.append("The forecast has no years.")
+    if len(assumptions.ebit_margin) != assumptions.horizon:
+        shape_problems.append("Revenue growth and margin paths are different lengths.")
+    if shape_problems:
+        return FcfeResult(notices=tuple(head) + tuple(shape_problems))
+
+    table, _final_rev, final_fcfe = forecast_fcfe(
+        assumptions, financials.base_revenue, net_debt=_num(financials.net_debt)
+    )
+    if not table:
+        return FcfeResult(notices=(*head, "No FCFE forecast could be built."))
+
+    notices: list[str] = list(head)
+    pv_explicit = 0.0
+    for index, cash in enumerate(table["fcfe"], start=1):
+        cash = _num(cash)
+        if math.isnan(cash):
+            return FcfeResult(notices=(*notices, "A forecast year produced no FCFE."))
+        exponent = index - 0.5 if assumptions.mid_year else float(index)
+        pv_explicit += cash / (1.0 + ke) ** exponent
+
+    years = assumptions.horizon
+    if math.isnan(final_fcfe):
+        return FcfeResult(notices=(*notices, "Final-year FCFE is missing."))
+    if final_fcfe <= 0:
+        notices.append(
+            "Final-year FCFE is non-positive; the Gordon terminal value is unreliable."
+        )
+
+    terminal_value = final_fcfe * (1.0 + growth) / (ke - growth)
+    pv_terminal = terminal_value / (1.0 + ke) ** years
+    equity_value = pv_explicit + pv_terminal
+    shares = _num(financials.shares)
+    per_share = _div(equity_value, shares)
+    px = _num(financials.current_price)
+    premium = _div(per_share, px) - 1.0 if _ok(px) and px > 0 else _NAN
+
+    return FcfeResult(
+        value_per_share=per_share,
+        equity_value=equity_value,
+        pv_explicit=pv_explicit,
+        pv_terminal=pv_terminal,
+        terminal_value=terminal_value,
+        fcfe_final=final_fcfe,
+        cost_of_equity=ke,
+        terminal_growth=growth,
+        shares=shares,
+        current_price=px,
+        premium_to_price=premium,
+        forecast=table,
+        notices=tuple(notices),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Multi-model reconciliation (FCFF + FCFE + DDM + Gordon)
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class MultiModelResult:
+    """Side-by-side intrinsic values and the premium/discount vs CMP."""
+
+    fcff: DcfResult = field(default_factory=DcfResult)
+    fcfe: FcfeResult = field(default_factory=FcfeResult)
+    ddm: DdmResult = field(default_factory=DdmResult)
+    gordon_value: float = _NAN
+    current_price: float = _NAN
+    blended_value: float = _NAN
+    premium_to_price: float = _NAN
+    notices: tuple[str, ...] = field(default_factory=tuple)
+
+    @property
+    def ok(self) -> bool:
+        return not math.isnan(self.blended_value) and self.blended_value > 0
+
+
+def run_multi_model(
+    assumptions: DcfAssumptions,
+    financials: CompanyFinancials,
+    cost_of_equity: float,
+    current_dividend: float = _NAN,
+    dividend_growth: float = _NAN,
+    gordon_cash_flow: float = _NAN,
+    effective_tax_rate: float = _NAN,
+) -> MultiModelResult:
+    """Run FCFF, FCFE, DDM and Gordon Growth, then blend usable per-share values.
+
+    The blend is a simple average of the models that returned a positive
+    per-share value. Models that cannot run (missing dividend, bad spread)
+    drop out rather than polluting the average with zeros.
+    """
+    fcff = run_dcf(assumptions, financials, effective_tax_rate=effective_tax_rate)
+    fcfe = run_fcfe(
+        assumptions, financials, cost_of_equity=cost_of_equity, effective_tax_rate=effective_tax_rate
+    )
+
+    g_div = _num(dividend_growth)
+    if math.isnan(g_div):
+        g_div = _num(assumptions.terminal_growth)
+    ddm = run_ddm(
+        current_dividend=current_dividend,
+        growth_rate=g_div,
+        cost_of_equity=cost_of_equity,
+        current_price=financials.current_price,
+    )
+
+    base_cf = _num(gordon_cash_flow)
+    if math.isnan(base_cf):
+        # Prefer trailing FCF-like figure from the FCFF forecast's first year.
+        if fcff.forecast.get("fcff"):
+            base_cf = _num(fcff.forecast["fcff"][0]) / (
+                1.0 + _num(assumptions.revenue_growth[0])
+            ) if assumptions.revenue_growth else _num(fcff.forecast["fcff"][0])
+        else:
+            base_cf = _NAN
+    gordon = run_gordon(
+        base_cash_flow=base_cf,
+        growth_rate=_num(assumptions.terminal_growth),
+        discount_rate=_num(assumptions.wacc_value),
+    )
+    # Gordon above is enterprise-level when fed FCFF; convert to per-share.
+    gordon_ps = _NAN
+    if _ok(gordon, _num(financials.shares)) and financials.shares > 0:
+        gordon_equity = gordon - _num(financials.net_debt)
+        gordon_ps = _div(gordon_equity, _num(financials.shares))
+
+    values: list[float] = []
+    for v in (fcff.value_per_share, fcfe.value_per_share, ddm.value_per_share, gordon_ps):
+        if _ok(v) and v > 0:
+            values.append(v)
+    blended = sum(values) / len(values) if values else _NAN
+    px = _num(financials.current_price)
+    premium = _div(blended, px) - 1.0 if _ok(blended, px) and px > 0 else _NAN
+
+    notices: list[str] = []
+    notices.extend(fcff.notices)
+    notices.extend(fcfe.notices)
+    notices.extend(ddm.notices)
+    if not values:
+        notices.append("No valuation model produced a usable per-share value.")
+
+    return MultiModelResult(
+        fcff=fcff,
+        fcfe=fcfe,
+        ddm=ddm,
+        gordon_value=gordon_ps,
+        current_price=px,
+        blended_value=blended,
+        premium_to_price=premium,
+        notices=tuple(dict.fromkeys(notices)),  # preserve order, drop dupes
+    )
