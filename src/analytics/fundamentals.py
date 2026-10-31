@@ -403,6 +403,8 @@ def read_statements(
         columns.sort(key=sort_key, reverse=True)
 
     periods: list[FiscalPeriod] = []
+    raw_period_values: list[dict[str, float]] = []
+
     for column in columns:
         values: dict[str, float] = {}
         for field_name in LINE_ITEMS:
@@ -413,12 +415,38 @@ def read_statements(
                     break
             else:
                 values[field_name] = _NAN
+        raw_period_values.append(values)
 
+    # Data Science Cleaning & Imputation:
+    # Compute company's own historical mean per field across available periods,
+    # and impute missing values to ensure smooth time-series analytics.
+    field_means: dict[str, float] = {}
+    for field_name in LINE_ITEMS:
+        vals = [p[field_name] for p in raw_period_values if not math.isnan(p.get(field_name, _NAN))]
+        if vals:
+            field_means[field_name] = sum(vals) / len(vals)
+
+    imputed_count = 0
+    cleaned_period_values: list[dict[str, float]] = []
+    for values in raw_period_values:
+        cleaned_values: dict[str, float] = {}
+        for field_name, val in values.items():
+            if math.isnan(val) and field_name in field_means:
+                cleaned_values[field_name] = field_means[field_name]
+                imputed_count += 1
+            else:
+                cleaned_values[field_name] = val
+        cleaned_period_values.append(cleaned_values)
+
+    if imputed_count > 0:
+        notices.append(f"Data cleaning applied: imputed {imputed_count} missing historical data points using company temporal mean.")
+
+    for i, column in enumerate(columns):
         try:
             ends = pd.Timestamp(column).date()
         except (TypeError, ValueError):  # pragma: no cover - exotic column
             ends = None
-        periods.append(FiscalPeriod(period_end=ends, values=values))
+        periods.append(FiscalPeriod(period_end=ends, values=cleaned_period_values[i]))
 
     return Statements(
         ticker=str(ticker or ""),

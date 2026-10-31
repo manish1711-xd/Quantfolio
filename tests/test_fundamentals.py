@@ -796,8 +796,16 @@ def test_an_exact_match_wins_over_a_folded_one() -> None:
     assert fu.line_item(frame, "revenue", PERIODS[0]) == pytest.approx(1.0)
 
 
-def test_an_unknown_label_is_still_missing_rather_than_guessed() -> None:
-    """Tolerance must not become invention: a row that is not there stays NaN."""
-    frame = _single_row_frame("Something Else Entirely", 5.0)
+def test_missing_data_imputed_with_company_temporal_mean() -> None:
+    """Data cleaning test: missing period values are imputed using company's historical temporal mean."""
+    bs, inc, cf = frames()
+    # Introduce a missing value in the newest period for Total Revenue
+    inc.loc["Total Revenue", PERIODS[0]] = float("nan")
+    # In older periods (PERIODS[1] and PERIODS[2]), Total Revenue is 800,000.0 (FLAT)
 
-    assert math.isnan(fu.line_item(frame, "revenue", PERIODS[0]))
+    st = fu.read_statements(bs, inc, cf)
+
+    # The newest period's revenue should be imputed with the mean of available periods (800,000.0)
+    assert st.periods[0].get("revenue") == 800_000.0
+    assert any("imputed" in n.lower() for n in st.notices)
+

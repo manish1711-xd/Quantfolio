@@ -109,3 +109,52 @@ def test_analyze_fundamentals_empty_statements():
     assert np.isnan(fund_data.net_margin)
     assert np.isnan(fund_data.roe)
     assert "income statement" in fund_data.missing_fields or "balance sheet" in fund_data.missing_fields
+
+
+def test_ebitda_and_ebitda_margin(sample_statements):
+    """Test EBITDA and EBITDA margin calculation."""
+    # sample_statements has EBIT = 18000. Let's add Depreciation to income_df or test EBITDA derivation.
+    margins = compute_margins(sample_statements["income"])
+    assert not np.isnan(margins["ebitda"])
+    assert not np.isnan(margins["ebitda_margin"])
+    assert margins["ebitda_margin"] > 0
+
+    income_df = pd.DataFrame(
+        {
+            "2024-03-31": [500000.0, 150000.0, 100000.0, 80000.0],
+        },
+        index=[
+            "TotalRevenue",         # camelCase
+            "OperatingIncome",      # camelCase
+            "PretaxIncome",
+            "NetIncome",
+        ],
+    )
+    balance_df = pd.DataFrame(
+        {
+            "2024-03-31": [2000000.0, 300000.0, 1700000.0],
+        },
+        index=[
+            "TotalAssets",          # camelCase
+            "StockholdersEquity",   # camelCase
+            "CurrentLiabilities",
+        ],
+    )
+    cash_df = pd.DataFrame(
+        {"2024-03-31": [90000.0, -10000.0, 80000.0]},
+        index=["OperatingCashFlow", "CapitalExpenditure", "FreeCashFlow"],
+    )
+    statements = {
+        "income": income_df,
+        "balance_sheet": balance_df,
+        "cash_flow": cash_df,
+    }
+
+    fund = analyze_fundamentals(statements, quote_info={"shares_outstanding": 10000.0})
+    # Revenue = 500,000, Net Income = 80,000 -> Net Margin = 80,000 / 500,000 = 0.16
+    assert not np.isnan(fund.net_margin)
+    assert np.isclose(fund.net_margin, 80000.0 / 500000.0)
+    # ROCE should compute via EBIT / (Assets - Current Liabilities) or Equity
+    assert not np.isnan(fund.roce)
+    assert not np.isnan(fund.roe)
+

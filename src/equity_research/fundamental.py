@@ -16,41 +16,139 @@ from src.equity_research.models import FundamentalData
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Normalized key matching — survives yfinance label renames (0.2.x spaced
+# "Total Revenue" vs 1.x camelCase "TotalRevenue") and banking-specific
+# line item names without silent NaN.
+# ---------------------------------------------------------------------------
+
+def _normalize_key(label: str) -> str:
+    """Reduce a row label to lowercase alphanumerics for tolerant matching.
+
+    yfinance 0.2.x returned ``"Total Revenue"`` and 1.x returns
+    ``"TotalRevenue"``.  Folding away case, spaces, and underscores makes
+    the alias lists survive this rename and the next one.
+    """
+    return "".join(ch for ch in str(label).lower() if ch.isalnum())
+
+
+def _get_latest_item(df: pd.DataFrame, candidate_keys: list[str]) -> tuple[float, Optional[str]]:
+    """Look up the most recent period's value for the first matching line item.
+
+    Tries exact match first (cheap), then a normalized fallback (survives
+    provider renames).  Returns (value, matched_key) or (np.nan, None).
+    """
+    if df is None or df.empty:
+        return np.nan, None
+
+    # Pass 1 — exact match
+    for key in candidate_keys:
+        if key in df.index:
+            row = df.loc[key]
+            val = row.iloc[0] if isinstance(row, pd.Series) else row
+            try:
+                num = float(val)
+                if not np.isnan(num):
+                    return num, key
+            except (ValueError, TypeError):
+                continue
+
+    # Pass 2 — normalized (case-/punctuation-insensitive) match
+    wanted = {_normalize_key(k) for k in candidate_keys}
+    for label in df.index:
+        if _normalize_key(label) in wanted:
+            row = df.loc[label]
+            val = row.iloc[0] if isinstance(row, pd.Series) else row
+            try:
+                num = float(val)
+                if not np.isnan(num):
+                    return num, str(label)
+            except (ValueError, TypeError):
+                continue
+
+    return np.nan, None
+
+
+# ---------------------------------------------------------------------------
 # Row aliases for Yahoo Finance / standard filings
-REVENUE_KEYS = ["Total Revenue", "Operating Revenue", "Revenue"]
-GROSS_PROFIT_KEYS = ["Gross Profit"]
-OPERATING_INCOME_KEYS = ["Operating Income", "Operating Profit"]
-EBIT_KEYS = ["EBIT", "Operating Income", "Normalized EBITDA"]
+# ---------------------------------------------------------------------------
+# Each list includes spaced labels (yfinance 0.2.x), camelCase labels
+# (yfinance 1.x), and banking/financial-sector alternates.
+
+REVENUE_KEYS = [
+    "Total Revenue", "TotalRevenue",
+    "Operating Revenue", "OperatingRevenue",
+    "Revenue",
+    "Net Interest Income",         # banking
+    "Total Interest Income",       # banking
+]
+GROSS_PROFIT_KEYS = [
+    "Gross Profit", "GrossProfit",
+]
+COST_OF_REVENUE_KEYS = [
+    "Cost Of Revenue", "CostOfRevenue",
+    "Cost of Goods Sold", "CostOfGoodsSold",
+    "Total Cost Of Revenue",
+]
+OPERATING_INCOME_KEYS = [
+    "Operating Income", "OperatingIncome",
+    "Operating Profit", "OperatingProfit",
+    "Operating Income EBIT",
+]
+EBIT_KEYS = [
+    "EBIT",
+    "Operating Income", "OperatingIncome",
+    "Operating Profit", "OperatingProfit",
+    "Normalized EBITDA",
+]
+PRETAX_INCOME_KEYS = [
+    "Pretax Income", "PretaxIncome",
+    "Income Before Tax",
+    "Earnings Before Tax",
+]
+INTEREST_EXPENSE_KEYS = [
+    "Interest Expense", "InterestExpense",
+    "Interest Expense Non Operating",
+    "Net Interest Income",  # sometimes negative = expense for non-banks
+]
 NET_INCOME_KEYS = [
-    "Net Income Common Stockholders",
-    "Net Income",
+    "Net Income Common Stockholders", "NetIncomeCommonStockholders",
+    "Net Income", "NetIncome",
     "Net Income Applicable To Common Shares",
     "Net Income Available to Stockholders",
 ]
-TOTAL_ASSETS_KEYS = ["Total Assets"]
+TOTAL_ASSETS_KEYS = ["Total Assets", "TotalAssets"]
 EQUITY_KEYS = [
-    "Stockholders Equity",
-    "Total Equity",
-    "Total Stockholders Equity",
-    "Common Stock Equity",
+    "Stockholders Equity", "StockholdersEquity",
+    "Total Equity", "TotalEquity",
+    "Total Stockholders Equity", "TotalStockholdersEquity",
+    "Common Stock Equity", "CommonStockEquity",
 ]
-TOTAL_DEBT_KEYS = ["Total Debt", "Long Term Debt", "Total Liabilities Net Minority Interest"]
+TOTAL_DEBT_KEYS = [
+    "Total Debt", "TotalDebt",
+    "Long Term Debt", "LongTermDebt",
+    "Total Liabilities Net Minority Interest", "TotalLiabilitiesNetMinorityInterest",
+]
+CURRENT_LIABILITIES_KEYS = [
+    "Current Liabilities", "CurrentLiabilities",
+    "Total Current Liabilities",
+]
 CASH_KEYS = [
-    "Cash And Cash Equivalents",
+    "Cash And Cash Equivalents", "CashAndCashEquivalents",
     "Cash Cash Equivalents And Short Term Investments",
     "Cash And Short Term Investments",
 ]
 LIABILITIES_KEYS = [
-    "Total Liabilities Net Minority Interest",
-    "Total Liabilities",
-    "Current Liabilities",
+    "Total Liabilities Net Minority Interest", "TotalLiabilitiesNetMinorityInterest",
+    "Total Liabilities", "TotalLiabilities",
+    "Current Liabilities", "CurrentLiabilities",
 ]
 OPERATING_CF_KEYS = [
-    "Operating Cash Flow",
+    "Operating Cash Flow", "OperatingCashFlow",
     "Cash Flow From Continuing Operating Activities",
 ]
-CAPEX_KEYS = ["Capital Expenditure", "Capital Expenditures"]
-FCF_KEYS = ["Free Cash Flow"]
+CAPEX_KEYS = ["Capital Expenditure", "CapitalExpenditure", "Capital Expenditures"]
+FCF_KEYS = ["Free Cash Flow", "FreeCashFlow"]
 
 
 def _get_latest_item(df: pd.DataFrame, candidate_keys: list[str]) -> tuple[float, Optional[str]]:
@@ -75,7 +173,7 @@ def _get_latest_item(df: pd.DataFrame, candidate_keys: list[str]) -> tuple[float
 
 
 def compute_margins(income_df: pd.DataFrame) -> dict[str, float]:
-    """Calculate gross, operating, and net profit margins."""
+    """Calculate gross, operating, net profit, and EBITDA margins with fallback derivations."""
     rev, _ = _get_latest_item(income_df, REVENUE_KEYS)
     gp, _ = _get_latest_item(income_df, GROSS_PROFIT_KEYS)
     op_inc, _ = _get_latest_item(income_df, OPERATING_INCOME_KEYS)
@@ -86,14 +184,51 @@ def compute_margins(income_df: pd.DataFrame) -> dict[str, float]:
             "gross_margin": np.nan,
             "operating_margin": np.nan,
             "net_margin": np.nan,
+            "ebitda_margin": np.nan,
+            "ebitda": np.nan,
             "revenue": np.nan,
             "net_income": np.nan,
         }
 
+    # Fallback derivation for Gross Profit if absent: Revenue - Cost of Revenue
+    if np.isnan(gp):
+        cor, _ = _get_latest_item(income_df, COST_OF_REVENUE_KEYS)
+        if not np.isnan(cor):
+            gp = rev - cor
+        elif not np.isnan(op_inc):
+            gp = op_inc
+
+    if np.isnan(op_inc) and not np.isnan(gp):
+        op_inc = gp
+
+    # EBITDA calculation: Net Income + Interest + Tax + Depreciation (+ Amortization)
+    ebitda, _ = _get_latest_item(income_df, ["EBITDA", "Normalized EBITDA", "NormalizedEBITDA", "Ebitda"])
+    depr_val, _ = _get_latest_item(income_df, [
+        "Depreciation And Amortization", "DepreciationAmortizationDepletion",
+        "Depreciation", "Amortization", "Reconciled Depreciation"
+    ])
+    if np.isnan(ebitda):
+        ebit_val, _ = _get_latest_item(income_df, EBIT_KEYS)
+        if not np.isnan(ebit_val) and not np.isnan(depr_val):
+            ebitda = ebit_val + depr_val
+        elif not np.isnan(net_inc):
+            tax_val, _ = _get_latest_item(income_df, ["Tax Provision", "TaxProvision", "Income Tax Expense"])
+            int_val, _ = _get_latest_item(income_df, INTEREST_EXPENSE_KEYS)
+            t_val = tax_val if not np.isnan(tax_val) else 0.0
+            i_val = int_val if not np.isnan(int_val) else 0.0
+            d_val = depr_val if not np.isnan(depr_val) else 0.0
+            ebitda = net_inc + i_val + t_val + d_val
+        elif not np.isnan(op_inc):
+            ebitda = op_inc + (depr_val if not np.isnan(depr_val) else 0.0)
+
+    ebitda_margin = float(ebitda / rev) if not np.isnan(ebitda) and rev > 0 else np.nan
+
     return {
-        "gross_margin": float(gp / rev) if not np.isnan(gp) else np.nan,
-        "operating_margin": float(op_inc / rev) if not np.isnan(op_inc) else np.nan,
-        "net_margin": float(net_inc / rev) if not np.isnan(net_inc) else np.nan,
+        "gross_margin": float(gp / rev) if not np.isnan(gp) and rev > 0 else np.nan,
+        "operating_margin": float(op_inc / rev) if not np.isnan(op_inc) and rev > 0 else np.nan,
+        "net_margin": float(net_inc / rev) if not np.isnan(net_inc) and rev > 0 else np.nan,
+        "ebitda_margin": ebitda_margin,
+        "ebitda": float(ebitda) if not np.isnan(ebitda) else np.nan,
         "revenue": float(rev),
         "net_income": float(net_inc) if not np.isnan(net_inc) else np.nan,
     }
@@ -104,38 +239,56 @@ def compute_returns_and_earnings(
     balance_df: pd.DataFrame,
     shares_outstanding: Optional[float] = None,
 ) -> dict[str, float]:
-    """Calculate ROE, ROCE, and EPS."""
+    """Calculate ROE, ROCE, and EPS with robust fallbacks for financial/banking stocks."""
     net_inc, _ = _get_latest_item(income_df, NET_INCOME_KEYS)
     ebit, _ = _get_latest_item(income_df, EBIT_KEYS)
+    if np.isnan(ebit):
+        op_inc, _ = _get_latest_item(income_df, OPERATING_INCOME_KEYS)
+        if not np.isnan(op_inc):
+            ebit = op_inc
+        else:
+            pretax, _ = _get_latest_item(income_df, PRETAX_INCOME_KEYS)
+            interest, _ = _get_latest_item(income_df, INTEREST_EXPENSE_KEYS)
+            if not np.isnan(pretax) and not np.isnan(interest):
+                ebit = pretax + interest
+
     equity, _ = _get_latest_item(balance_df, EQUITY_KEYS)
     debt, _ = _get_latest_item(balance_df, TOTAL_DEBT_KEYS)
     assets, _ = _get_latest_item(balance_df, TOTAL_ASSETS_KEYS)
+    current_liab, _ = _get_latest_item(balance_df, CURRENT_LIABILITIES_KEYS)
 
     # ROE = Net Income / Equity
     roe = np.nan
     if not np.isnan(net_inc) and not np.isnan(equity) and equity > 0:
         roe = float(net_inc / equity)
+    elif not np.isnan(net_inc) and not np.isnan(assets) and assets > 0:
+        # Fallback ROE using assets if equity is absent
+        roe = float(net_inc / assets)
 
-    # ROCE = EBIT / Capital Employed (Equity + Total Debt)
+    # ROCE = EBIT / Capital Employed
+    # Capital Employed = Equity + Total Debt (or Total Assets - Current Liabilities)
     roce = np.nan
     cap_employed = np.nan
     if not np.isnan(equity):
         d_val = debt if not np.isnan(debt) else 0.0
         cap_employed = equity + d_val
+    elif not np.isnan(assets) and not np.isnan(current_liab):
+        cap_employed = assets - current_liab
+    elif not np.isnan(assets):
+        cap_employed = assets
 
     if not np.isnan(ebit) and not np.isnan(cap_employed) and cap_employed > 0:
         roce = float(ebit / cap_employed)
-    elif not np.isnan(ebit) and not np.isnan(assets) and assets > 0:
-        # Fallback to total assets if capital employed is unavailable
-        roce = float(ebit / assets)
+    elif not np.isnan(net_inc) and not np.isnan(cap_employed) and cap_employed > 0:
+        # Fallback using net income if EBIT is absent
+        roce = float(net_inc / cap_employed)
 
     # EPS = Net Income / Shares Outstanding
     eps = np.nan
     if not np.isnan(net_inc) and shares_outstanding and shares_outstanding > 0:
         eps = float(net_inc / shares_outstanding)
     else:
-        # Check if income statement has reported Basic EPS
-        reported_eps, _ = _get_latest_item(income_df, ["Basic EPS", "Diluted EPS"])
+        reported_eps, _ = _get_latest_item(income_df, ["Basic EPS", "Diluted EPS", "BasicEPS", "DilutedEPS"])
         if not np.isnan(reported_eps):
             eps = float(reported_eps)
 
@@ -243,6 +396,8 @@ def analyze_fundamentals(
         gross_margin=margins.get("gross_margin", np.nan),
         operating_margin=margins.get("operating_margin", np.nan),
         net_margin=margins.get("net_margin", np.nan),
+        ebitda_margin=margins.get("ebitda_margin", np.nan),
+        ebitda=margins.get("ebitda", np.nan),
         eps=returns_eps.get("eps", np.nan),
         roe=returns_eps.get("roe", np.nan),
         roce=returns_eps.get("roce", np.nan),

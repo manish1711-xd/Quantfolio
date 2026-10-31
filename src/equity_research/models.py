@@ -25,6 +25,8 @@ class FundamentalData:
     gross_margin: float = np.nan
     operating_margin: float = np.nan
     net_margin: float = np.nan
+    ebitda_margin: float = np.nan
+    ebitda: float = np.nan
     eps: float = np.nan
     roe: float = np.nan
     roce: float = np.nan

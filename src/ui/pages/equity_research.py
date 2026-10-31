@@ -410,39 +410,66 @@ def render() -> None:
     fundamentals = analyze_fundamentals(statements, quote_info=quote)
     technicals = analyze_technicals(ohlcv, bench_df=bench_hist)
 
-    # Valuation Knobs (Overrides) in Sidebar/Expander
-    with st.expander("🛠️ Valuation Modeling Controls & Assumptions", expanded=False):
-        col_w1, col_w2, col_w3 = st.columns(3)
+    # Valuation Knobs & Margin Overrides in Expander with precise numeric inputs
+    with st.expander("🛠️ Valuation Modeling Controls & Assumptions (Custom Inputs)", expanded=True):
+        col_w1, col_w2, col_w3, col_w4, col_w5 = st.columns(5)
         with col_w1:
-            wacc_input = st.slider(
-                "Discount Rate (WACC)",
-                min_value=0.05,
-                max_value=0.20,
-                value=0.10,
-                step=0.005,
-                format="%.1f%%",
-                help="Weighted Average Cost of Capital used to discount future cash flows.",
+            wacc_pct = st.number_input(
+                "Discount Rate (WACC %)",
+                min_value=1.0,
+                max_value=30.0,
+                value=10.0,
+                step=0.1,
+                format="%.2f",
+                help="Enter WACC as a percentage (e.g. 8.0 for 8%).",
             )
+            wacc_input = wacc_pct / 100.0
         with col_w2:
-            growth_input = st.slider(
-                "Forecast FCF Growth Rate",
-                min_value=0.00,
-                max_value=0.30,
-                value=0.08,
-                step=0.01,
-                format="%.1f%%",
-                help="Annual geometric growth rate projected for the explicit 5-year horizon.",
+            growth_pct = st.number_input(
+                "FCF Growth Rate (%)",
+                min_value=-20.0,
+                max_value=50.0,
+                value=8.0,
+                step=0.1,
+                format="%.2f",
+                help="Enter FCF growth rate as a percentage (e.g. 6.6 for 6.6%).",
             )
+            growth_input = growth_pct / 100.0
         with col_w3:
-            term_g_input = st.slider(
-                "Terminal Growth Rate",
-                min_value=0.01,
-                max_value=0.05,
-                value=0.03,
-                step=0.005,
-                format="%.1f%%",
-                help="Perpetual growth rate into infinity. Must be strictly lower than WACC.",
+            term_g_pct = st.number_input(
+                "Terminal Growth (%)",
+                min_value=0.0,
+                max_value=10.0,
+                value=3.0,
+                step=0.1,
+                format="%.2f",
+                help="Enter terminal growth rate as a percentage (e.g. 3.0 for 3%).",
             )
+            term_g_input = term_g_pct / 100.0
+        with col_w4:
+            default_gm = float(fundamentals.gross_margin * 100.0) if not np.isnan(fundamentals.gross_margin) else 40.0
+            gm_pct = st.number_input(
+                "Gross Margin (%)",
+                min_value=0.0,
+                max_value=100.0,
+                value=default_gm,
+                step=0.5,
+                format="%.2f",
+                help="Override Gross Margin percentage.",
+            )
+            fundamentals.gross_margin = gm_pct / 100.0
+        with col_w5:
+            default_om = float(fundamentals.operating_margin * 100.0) if not np.isnan(fundamentals.operating_margin) else 15.0
+            om_pct = st.number_input(
+                "Operating Margin (%)",
+                min_value=-50.0,
+                max_value=100.0,
+                value=default_om,
+                step=0.5,
+                format="%.2f",
+                help="Override Operating Margin percentage.",
+            )
+            fundamentals.operating_margin = om_pct / 100.0
 
     # 3. Compute DCF Valuation
     base_fcf = fundamentals.free_cash_flow if not np.isnan(fundamentals.free_cash_flow) and fundamentals.free_cash_flow > 0 else (
