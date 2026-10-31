@@ -280,7 +280,7 @@ def calculate_multi_model_valuation(
         model_names=model_names,
         recommendation=recommendation,
         current_price=current_price or np.nan,
-        notices=list(set(notices + multi_result.notices)),
+        notices=list(set(notices + list(multi_result.notices))),
     )
 
 
