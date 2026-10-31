@@ -32,6 +32,7 @@ from src.equity_research.dcf import (
     DCFInputs,
     calculate_dcf_valuation,
     generate_scenario_analysis,
+    calculate_multi_model_valuation,
 )
 from src.equity_research.export import (
     export_equity_report_pdf,
@@ -48,6 +49,7 @@ from src.equity_research.models import (
     FundamentalData,
     TechnicalData,
     ValuationResult,
+    MultiModelValuationResult,
 )
 from src.equity_research.peer_comparison import analyze_peer_comparison
 from src.equity_research.technical import analyze_technicals
@@ -476,6 +478,7 @@ def render() -> None:
         quote.get("market_cap", 0.0) * 0.04 if quote.get("market_cap") and not np.isnan(quote["market_cap"]) else 1000000.0
     )
     shares = quote.get("shares_outstanding") or fundamentals.shares_outstanding
+    net_debt = quote.get("total_debt", 0.0) - quote.get("cash", 0.0) if quote.get("total_debt") else 0.0
 
     dcf_in = DCFInputs(
         fcffree=base_fcf,
@@ -483,10 +486,21 @@ def render() -> None:
         growth_rate=growth_input,
         terminal_growth_rate=term_g_input,
         shares_outstanding=shares,
-        net_debt=0.0,
+        net_debt=net_debt if net_debt else 0.0,
         projection_years=5,
     )
+
+    # Legacy single-model valuation
     valuation = calculate_dcf_valuation(dcf_in, current_price=quote.get("price"))
+
+    # Multi-model valuation (FCFF, FCFE, DDM, Gordon Growth)
+    dividend_ps = quote.get("dividend_yield", 0.0) * (quote.get("price", 0) / (fundamentals.eps if not np.isnan(fundamentals.eps) else 1)) if quote.get("price") and not np.isnan(quote.get("price", 0)) else None
+    multi_valuation = calculate_multi_model_valuation(
+        dcf_in,
+        current_price=quote.get("price"),
+        dividend_per_share=dividend_ps,
+    )
+
     scenarios = generate_scenario_analysis(
         base_fcf=base_fcf,
         base_wacc=wacc_input,
@@ -529,7 +543,7 @@ def render() -> None:
     curr = quote.get("currency", "INR")
     curr_sym = "₹" if curr == "INR" else "$" if curr == "USD" else f"{curr} "
     price = quote.get("price")
-    target_val = valuation.intrinsic_value
+    target_val = multi_valuation.blended_intrinsic if multi_valuation.ok else valuation.intrinsic_value
 
     # --- Header Strip ---
     st.markdown(f"### {quote.get('name', ticker_input)} ({ticker_input})")
@@ -553,7 +567,16 @@ def render() -> None:
                 st.caption(f"**Missing Statement Items:** {', '.join(fundamentals.missing_fields)} (reported as missing, never fabricated).")
 
     # --- KPI Row ---
-    rec = valuation.recommendation or "Hold"
+    # Use multi-model valuation for recommendation and upside
+    if multi_valuation.ok:
+        rec = multi_valuation.recommendation
+        premium = multi_valuation.premium_to_price
+        target_val = multi_valuation.blended_intrinsic
+    else:
+        rec = valuation.recommendation or "Hold"
+        premium = (valuation.intrinsic_value - price) / price if valuation.intrinsic_value and price and price > 0 else np.nan
+        target_val = valuation.intrinsic_value
+
     rec_tone = "gain" if rec.upper() == "BUY" else "loss" if rec.upper() == "SELL" else "warn"
 
     upside_str = DASH
@@ -563,11 +586,11 @@ def render() -> None:
 
     kpis = [
         {"label": "Spot Price", "value": f"{curr_sym}{price:,.2f}" if price and not np.isnan(price) else DASH},
-        {"label": "DCF Fair Value", "value": f"{curr_sym}{target_val:,.2f}" if target_val and not np.isnan(target_val) else DASH, "tone": rec_tone},
+        {"label": "Blended DCF Fair Value", "value": f"{curr_sym}{target_val:,.2f}" if target_val and not np.isnan(target_val) else DASH, "tone": rec_tone},
         {"label": "Implied Upside", "value": upside_str, "tone": rec_tone},
         {"label": "Model Assessment", "value": rec.upper(), "tone": rec_tone},
+        {"label": "FCFF Intrinsic", "value": f"{curr_sym}{multi_valuation.fcff_intrinsic:,.2f}" if multi_valuation.fcff_intrinsic and not np.isnan(multi_valuation.fcff_intrinsic) else DASH},
         {"label": "Operating Margin", "value": fmt_ratio_pct(fundamentals.operating_margin)},
-        {"label": "14-Day RSI", "value": fmt_num(technicals.rsi, 1)},
     ]
     ui.kpi_row(kpis)
 
@@ -635,7 +658,79 @@ def render() -> None:
     # Tab 2: DCF Valuation & Scenarios
     with tabs[1]:
         st.markdown("### Discounted Cash Flow (DCF) Valuation Model")
-        st.caption("5-Year Explicit Projection Horizon with Gordon Growth Terminal Value.")
+        st.caption("Multi-Model Valuation: FCFF, FCFE, DDM, and Gordon Growth with Blended Intrinsic Value.")
+
+        # --- Multi-Model Valuation Results ---
+        if multi_valuation.ok:
+            st.markdown("#### 🧮 Multi-Model Valuation Summary")
+            multi_cols = st.columns(4)
+
+            # FCFF
+            with multi_cols[0]:
+                fcff_val = multi_valuation.fcff_intrinsic
+                fcff_up = (fcff_val - price) / price if fcff_val and price and price > 0 else np.nan
+                ui.kpi_card(
+                    label="FCFF Model",
+                    value=f"{curr_sym}{fcff_val:,.2f}" if fcff_val and not np.isnan(fcff_val) else DASH,
+                    delta=f"Upside: {'+' if fcff_up >= 0 else ''}{fcff_up * 100:.1f}%" if not np.isnan(fcff_up) else None,
+                    delta_tone="gain" if not np.isnan(fcff_up) and fcff_up > 0.1 else "warn" if not np.isnan(fcff_up) else "neutral",
+                    tone="neutral",
+                    footnote=f"Discounted at WACC ({wacc_input:.1%})",
+                )
+
+            # FCFE
+            with multi_cols[1]:
+                fcfe_val = multi_valuation.fcfe_intrinsic
+                fcfe_up = (fcfe_val - price) / price if fcfe_val and price and price > 0 else np.nan
+                ui.kpi_card(
+                    label="FCFE Model",
+                    value=f"{curr_sym}{fcfe_val:,.2f}" if fcfe_val and not np.isnan(fcfe_val) else DASH,
+                    delta=f"Upside: {'+' if fcfe_up >= 0 else ''}{fcfe_up * 100:.1f}%" if not np.isnan(fcfe_up) else None,
+                    delta_tone="gain" if not np.isnan(fcfe_up) and fcfe_up > 0.1 else "warn" if not np.isnan(fcfe_up) else "neutral",
+                    tone="neutral",
+                    footnote=f"Discounted at Cost of Equity",
+                )
+
+            # DDM
+            with multi_cols[2]:
+                ddm_val = multi_valuation.ddm_value
+                ddm_up = (ddm_val - price) / price if ddm_val and price and price > 0 else np.nan
+                ui.kpi_card(
+                    label="DDM Model",
+                    value=f"{curr_sym}{ddm_val:,.2f}" if ddm_val and not np.isnan(ddm_val) else DASH,
+                    delta=f"Upside: {'+' if ddm_up >= 0 else ''}{ddm_up * 100:.1f}%" if not np.isnan(ddm_up) else None,
+                    delta_tone="gain" if not np.isnan(ddm_up) and ddm_up > 0.1 else "warn" if not np.isnan(ddm_up) else "neutral",
+                    tone="neutral",
+                    footnote=f"Growth: {term_g_input:.1%}",
+                )
+
+            # Gordon Growth
+            with multi_cols[3]:
+                gordon_val = multi_valuation.gordon_value
+                gordon_up = (gordon_val - price) / price if gordon_val and price and price > 0 else np.nan
+                ui.kpi_card(
+                    label="Gordon Growth",
+                    value=f"{curr_sym}{gordon_val:,.2f}" if gordon_val and not np.isnan(gordon_val) else DASH,
+                    delta=f"Upside: {'+' if gordon_up >= 0 else ''}{gordon_up * 100:.1f}%" if not np.isnan(gordon_up) else None,
+                    delta_tone="gain" if not np.isnan(gordon_up) and gordon_up > 0.1 else "warn" if not np.isnan(gordon_up) else "neutral",
+                    tone="neutral",
+                    footnote=f"One-stage TV model",
+                )
+
+            # Blended Value
+            st.markdown("---")
+            col_blend = st.columns(1)[0]
+            with col_blend:
+                blended_val = multi_valuation.blended_intrinsic
+                blended_up = multi_valuation.premium_to_price
+                ui.kpi_card(
+                    label="Blended Intrinsic Value",
+                    value=f"{curr_sym}{blended_val:,.2f}" if blended_val and not np.isnan(blended_val) else DASH,
+                    delta=f"Premium: {'+' if blended_up >= 0 else ''}{blended_up * 100:.1f}%" if not np.isnan(blended_up) else None,
+                    delta_tone="gain" if not np.isnan(blended_up) and blended_up > 0.15 else "loss" if not np.isnan(blended_up) and blended_up < -0.15 else "warn",
+                    tone=rec_tone,
+                    footnote=f"Models used: {', '.join(multi_valuation.model_names)}",
+                )
 
         val_col1, val_col2 = st.columns([1.2, 1])
         with val_col1:
@@ -650,21 +745,21 @@ def render() -> None:
                 ("Terminal Value (PV)", f"{curr_sym}{valuation.terminal_value:,.0f}" if not np.isnan(valuation.terminal_value) else DASH),
                 ("Equity Value", f"{curr_sym}{valuation.equity_value:,.0f}" if not np.isnan(valuation.equity_value) else DASH),
                 ("Shares Outstanding", fmt_num(shares, 0)),
-                ("Intrinsic Target / Share", f"{curr_sym}{valuation.intrinsic_value:,.2f}" if valuation.intrinsic_value else DASH),
+                ("Blended Intrinsic", f"{curr_sym}{target_val:,.2f}" if target_val and not np.isnan(target_val) else DASH),
                 ("Fair Value Band", f"{curr_sym}{valuation.fair_value_low:,.1f} – {curr_sym}{valuation.fair_value_high:,.1f}" if valuation.fair_value_low else DASH),
             ]
             ui.stat_grid(val_summary, columns=2)
 
         # Sensitivity Matrix Heatmap
         st.divider()
-        st.markdown("### Valuation Sensitivity Matrix (WACC vs Growth)")
+        st.markdown("### 📈 Valuation Sensitivity Matrix (WACC vs Growth)")
         if valuation.sensitivity_table is not None and not valuation.sensitivity_table.empty:
             sens_fig = _build_sensitivity_heatmap(valuation.sensitivity_table, curr_sym)
             ui.chart(sens_fig)
 
         # Bull / Base / Bear Scenarios
         st.divider()
-        st.markdown("### Scenario Analysis (Bull, Base, Bear)")
+        st.markdown("### 🎯 Scenario Analysis (Bull, Base, Bear)")
         sc_cols = st.columns(3)
         for idx, (sc_name, sc_data) in enumerate(scenarios.items()):
             with sc_cols[idx]:
@@ -680,6 +775,19 @@ def render() -> None:
                     footnote=f"WACC: {sc_data['wacc']:.1%} | g: {sc_data['growth_rate']:.1%}",
                 )
 
+        # Model Validation Section
+        st.divider()
+        st.markdown("### 📊 Model Validation & Cross-Check")
+        if multi_valuation.ok and multi_valuation.terminal_value if hasattr(multi_valuation, 'terminal_value') else True:
+            if not np.isnan(multi_valuation.fcff_value) and not np.isnan(multi_valuation.gordon_value):
+                gap_pct = abs(multi_valuation.fcff_value - multi_valuation.gordon_value) / max(multi_valuation.fcff_value, multi_valuation.gordon_value)
+                if gap_pct > 0.30:
+                    st.warning(f"⚠️ **Cross-model gap detected:** FCFF ({multi_valuation.fcff_value:,.0f}) vs Gordon ({multi_valuation.gordon_value:,.0f}) differs by {gap_pct:.0%}. Review terminal assumptions.")
+                else:
+                    st.success(f"✅ **Model alignment:** FCFF and Gordon Growth valuations are within {gap_pct:.0%} of each other, indicating coherent assumptions.")
+        else:
+            st.info("📋 Run complete multi-model valuation to see cross-model validation.")
+
     # Tab 3: Fundamentals & Financial Statements
     with tabs[2]:
         st.markdown("### Fundamental Ratios & Profitability")
@@ -687,6 +795,8 @@ def render() -> None:
             ("Gross Margin", fmt_ratio_pct(fundamentals.gross_margin)),
             ("Operating Margin", fmt_ratio_pct(fundamentals.operating_margin)),
             ("Net Profit Margin", fmt_ratio_pct(fundamentals.net_margin)),
+            ("EBITDA", f"{curr_sym}{fundamentals.ebitda:,.0f}" if not np.isnan(fundamentals.ebitda) else DASH),
+            ("EBITDA Margin", fmt_ratio_pct(fundamentals.ebitda_margin)),
             ("Earnings Per Share (EPS)", f"{curr_sym}{fundamentals.eps:,.2f}" if not np.isnan(fundamentals.eps) else DASH),
             ("Return on Equity (ROE)", fmt_ratio_pct(fundamentals.roe)),
             ("ROCE", fmt_ratio_pct(fundamentals.roce)),

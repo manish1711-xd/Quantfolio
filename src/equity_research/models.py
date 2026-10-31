@@ -71,7 +71,7 @@ class DCFInputs:
 
 @dataclass
 class ValuationResult:
-    """Outputs from DCF and relative valuation."""
+    """Outputs from DCF and relative valuation - single model base."""
     intrinsic_value: Optional[float]
     fair_value_low: Optional[float]
     fair_value_high: Optional[float]
@@ -83,6 +83,46 @@ class ValuationResult:
     equity_value: float = np.nan
     sensitivity_table: Optional[pd.DataFrame] = None
     status_notes: list[str] = field(default_factory=list)
+
+
+@dataclass
+class MultiModelValuationResult:
+    """Outputs from FCFF, FCFE, DDM, and Gordon Growth models with blended intrinsic value."""
+    # FCFF result
+    fcff_value: float = np.nan
+    fcff_intrinsic: float = np.nan
+    fcff_fair_low: float = np.nan
+    fcff_fair_high: float = np.nan
+
+    # FCFE result
+    fcfe_value: float = np.nan
+    fcfe_intrinsic: float = np.nan
+    fcfe_fair_low: float = np.nan
+    fcfe_fair_high: float = np.nan
+
+    # DDM result
+    ddm_value: float = np.nan
+
+    # Gordon Growth result
+    gordon_value: float = np.nan
+
+    # Blended result
+    blended_intrinsic: float = np.nan
+    blended_fair_low: float = np.nan
+    blended_fair_high: float = np.nan
+
+    # Premium/Disc vs current price
+    premium_to_price: float = np.nan
+    intrinsic_values: dict[str, float] = field(default_factory=dict)  # All usable model values
+    model_names: list[str] = field(default_factory=list)  # Names of models that produced values
+
+    recommendation: str = "Insufficient data"
+    current_price: float = np.nan
+    notices: list[str] = field(default_factory=list)
+
+    @property
+    def ok(self) -> bool:
+        return not np.isnan(self.blended_intrinsic) and self.blended_intrinsic > 0
 
 
 @dataclass

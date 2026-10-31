@@ -428,10 +428,11 @@ def read_statements(
 
     imputed_count = 0
     cleaned_period_values: list[dict[str, float]] = []
+    excluded_from_imputation = {"total_assets", "total_liabilities", "equity", "current_assets", "current_liabilities"}
     for values in raw_period_values:
         cleaned_values: dict[str, float] = {}
         for field_name, val in values.items():
-            if math.isnan(val) and field_name in field_means:
+            if math.isnan(val) and field_name in field_means and field_name not in excluded_from_imputation:
                 cleaned_values[field_name] = field_means[field_name]
                 imputed_count += 1
             else:
