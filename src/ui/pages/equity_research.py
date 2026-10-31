@@ -744,11 +744,15 @@ def render() -> None:
             ui.chart(cf_fig)
         with val_col2:
             st.markdown("**Valuation Bridge Summary**")
+            wacc_disp = multi_valuation.wacc_applied if not np.isnan(multi_valuation.wacc_applied) else valuation.wacc_used
+            term_g_disp = multi_valuation.terminal_growth_applied if not np.isnan(multi_valuation.terminal_growth_applied) else dcf_in.terminal_growth_rate
             val_summary = [
-                ("WACC Applied", fmt_ratio_pct(valuation.wacc_used)),
-                ("Terminal Growth (g)", fmt_ratio_pct(dcf_in.terminal_growth_rate)),
+                ("WACC Applied", fmt_ratio_pct(wacc_disp)),
+                ("Terminal Growth (g)", fmt_ratio_pct(term_g_disp)),
                 ("Enterprise Value", f"{curr_sym}{valuation.enterprise_value:,.0f}" if not np.isnan(valuation.enterprise_value) else DASH),
                 ("Terminal Value (PV)", f"{curr_sym}{valuation.terminal_value:,.0f}" if not np.isnan(valuation.terminal_value) else DASH),
+                ("TV Contribution %", f"{multi_valuation.tv_contribution_pct:.1%}" if not np.isnan(multi_valuation.tv_contribution_pct) else DASH),
+                ("Confidence Score", f"{multi_valuation.confidence_score:.0%}" if not np.isnan(multi_valuation.confidence_score) else DASH),
                 ("Equity Value", f"{curr_sym}{valuation.equity_value:,.0f}" if not np.isnan(valuation.equity_value) else DASH),
                 ("Shares Outstanding", fmt_num(shares, 0)),
                 ("Blended Intrinsic", f"{curr_sym}{target_val:,.2f}" if target_val and not np.isnan(target_val) else DASH),
@@ -783,16 +787,82 @@ def render() -> None:
 
         # Model Validation Section
         st.divider()
-        st.markdown("### 📊 Model Validation & Cross-Check")
-        if multi_valuation.ok and multi_valuation.terminal_value if hasattr(multi_valuation, 'terminal_value') else True:
-            if not np.isnan(multi_valuation.fcff_value) and not np.isnan(multi_valuation.gordon_value):
-                gap_pct = abs(multi_valuation.fcff_value - multi_valuation.gordon_value) / max(multi_valuation.fcff_value, multi_valuation.gordon_value)
-                if gap_pct > 0.30:
-                    st.warning(f"⚠️ **Cross-model gap detected:** FCFF ({multi_valuation.fcff_value:,.0f}) vs Gordon ({multi_valuation.gordon_value:,.0f}) differs by {gap_pct:.0%}. Review terminal assumptions.")
-                else:
-                    st.success(f"✅ **Model alignment:** FCFF and Gordon Growth valuations are within {gap_pct:.0%} of each other, indicating coherent assumptions.")
-        else:
-            st.info("📋 Run complete multi-model valuation to see cross-model validation.")
+        st.markdown("### 📊 Institutional Model Validation & Cross-Model Sanity Checks")
+        st.caption("Cross-model divergence monitoring between FCFF and Gordon Growth with institutional guardrails.")
+
+        # Metric cards for Requirement 9
+        audit_cols = st.columns(5)
+        with audit_cols[0]:
+            ui.kpi_card(
+                label="FCFF Value",
+                value=f"{curr_sym}{multi_valuation.fcff_value:,.2f}" if not np.isnan(multi_valuation.fcff_value) else DASH,
+                tone="neutral",
+                footnote="Explicit 5-Yr Forecast + TV",
+            )
+        with audit_cols[1]:
+            ui.kpi_card(
+                label="Gordon Growth",
+                value=f"{curr_sym}{multi_valuation.gordon_value:,.2f}" if not np.isnan(multi_valuation.gordon_value) else DASH,
+                tone="neutral",
+                footnote="Single-Stage Perpetuity",
+            )
+        with audit_cols[2]:
+            tv_pct = multi_valuation.tv_contribution_pct
+            tv_tone = "warn" if tv_pct >= 0.75 else "neutral"
+            ui.kpi_card(
+                label="TV Contribution",
+                value=f"{tv_pct:.1%}" if not np.isnan(tv_pct) else DASH,
+                tone=tv_tone,
+                footnote="Capped at ≤80.0% of EV",
+            )
+        with audit_cols[3]:
+            wacc_disp = multi_valuation.wacc_applied if not np.isnan(multi_valuation.wacc_applied) else dcf_in.wacc
+            g_disp = multi_valuation.terminal_growth_applied if not np.isnan(multi_valuation.terminal_growth_applied) else dcf_in.terminal_growth_rate
+            ui.kpi_card(
+                label="Applied WACC / g",
+                value=f"{wacc_disp:.1%} / {g_disp:.1%}" if not np.isnan(wacc_disp) else DASH,
+                tone="neutral",
+                footnote="Spread ≥ 2.0% enforced",
+            )
+        with audit_cols[4]:
+            conf = multi_valuation.confidence_score
+            conf_tone = "gain" if conf >= 0.75 else "warn" if conf >= 0.50 else "loss"
+            ui.kpi_card(
+                label="Confidence Score",
+                value=f"{conf:.0%}" if not np.isnan(conf) else DASH,
+                tone=conf_tone,
+                footnote="Institutional Model Rating",
+            )
+
+        # Cross-model gap sanity check tier alerts (Requirement 8)
+        gap_pct = multi_valuation.cross_model_gap_pct
+        if not np.isnan(gap_pct):
+            if multi_valuation.assumptions_rejected:
+                st.error(
+                    f"🛑 **Assumptions Rejected & Recalculated:** Cross-model gap of {gap_pct:.1%} exceeded 75% tolerance threshold. "
+                    f"Valuation was automatically recalculated using conservative defaults (WACC=10.0%, Terminal Growth=3.0%)."
+                )
+            elif gap_pct > 0.50:
+                st.error(
+                    f"🚨 **Major Warning (Gap > 50%):** FCFF ({curr_sym}{multi_valuation.fcff_value:,.2f}) vs Gordon Growth ({curr_sym}{multi_valuation.gordon_value:,.2f}) "
+                    f"differs by {gap_pct:.1%}. Terminal growth and cost of capital assumptions require institutional scrutiny."
+                )
+            elif gap_pct > 0.25:
+                st.warning(
+                    f"⚠️ **Warning (Gap > 25%):** FCFF ({curr_sym}{multi_valuation.fcff_value:,.2f}) vs Gordon Growth ({curr_sym}{multi_valuation.gordon_value:,.2f}) "
+                    f"differs by {gap_pct:.1%}. Assumptions show divergence between multi-stage and perpetuity models."
+                )
+            else:
+                st.success(
+                    f"✅ **Model Alignment Verified:** FCFF and Gordon Growth valuations are within {gap_pct:.1%} of each other (≤ 25% threshold), "
+                    f"confirming coherent valuation assumptions."
+                )
+
+        # Display audit notices
+        if multi_valuation.notices:
+            with st.expander("📋 Model Guardrail Audit Notices & Auto-Adjustments", expanded=bool(multi_valuation.assumptions_rejected or (not np.isnan(gap_pct) and gap_pct > 0.25))):
+                for notice in multi_valuation.notices:
+                    st.caption(f"- {notice}")
 
     # Tab 3: Fundamentals & Financial Statements
     with tabs[2]:

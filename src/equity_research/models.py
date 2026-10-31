@@ -68,6 +68,14 @@ class DCFInputs:
     net_debt: float = 0.0
     projection_years: int = 5
 
+    def copy_with(self, **kwargs) -> DCFInputs:
+        import dataclasses
+        return dataclasses.replace(self, **kwargs)
+
+    def model_copy(self, *, update: Optional[dict[str, Any]] = None) -> DCFInputs:
+        import dataclasses
+        return dataclasses.replace(self, **(update or {}))
+
 
 @dataclass
 class ValuationResult:
@@ -83,6 +91,8 @@ class ValuationResult:
     equity_value: float = np.nan
     sensitivity_table: Optional[pd.DataFrame] = None
     status_notes: list[str] = field(default_factory=list)
+    tv_contribution_pct: float = np.nan
+    confidence_score: float = np.nan
 
 
 @dataclass
@@ -119,6 +129,14 @@ class MultiModelValuationResult:
     recommendation: str = "Insufficient data"
     current_price: float = np.nan
     notices: list[str] = field(default_factory=list)
+
+    # Institutional Accuracy & Validation metrics
+    tv_contribution_pct: float = np.nan
+    cross_model_gap_pct: float = np.nan
+    confidence_score: float = np.nan
+    wacc_applied: float = np.nan
+    terminal_growth_applied: float = np.nan
+    assumptions_rejected: bool = False
 
     @property
     def ok(self) -> bool:
