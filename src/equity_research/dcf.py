@@ -149,13 +149,6 @@ def validate_dcf_assumptions(
     )
     return is_valid, notices, adjusted_inputs
 
-    adjusted_inputs = inputs.copy_with(
-        wacc=float(wacc),
-        growth_rate=float(growth_rate),
-        terminal_growth_rate=float(term_g),
-    )
-    return is_valid, notices, adjusted_inputs
-
 
 def calculate_terminal_value_contribution(terminal_val: float, enterprise_val: float) -> float:
     """Calculate terminal value contribution percentage = PV(TV) / Enterprise Value."""

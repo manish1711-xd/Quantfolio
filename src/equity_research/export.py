@@ -57,6 +57,58 @@ def build_html_report(report: EquityResearchReport) -> str:
 
     sections = report.sections
 
+    # Build dedicated Multi-Model Summary HTML table if available
+    mm_html = ""
+    if report.multi_valuation and report.multi_valuation.ok:
+        mv = report.multi_valuation
+        p_val = price or 0.0
+        mm_rows_html = ""
+        models_data = [
+            ("FCFF", "5-Year FCF + TV", f"WACC {mv.wacc_applied:.1%}", f"{mv.terminal_growth_applied:.1%}", mv.fcff_intrinsic, f"{curr_sym}{mv.fcff_fair_low:,.1f} – {curr_sym}{mv.fcff_fair_high:,.1f}" if not np.isnan(mv.fcff_fair_low) else "—", ((mv.fcff_intrinsic - p_val) / p_val * 100) if p_val > 0 else np.nan),
+            ("FCFE", "Equity Cash Flow", "Cost of Equity", f"{mv.terminal_growth_applied:.1%}", mv.fcfe_intrinsic, f"{curr_sym}{mv.fcfe_fair_low:,.1f} – {curr_sym}{mv.fcfe_fair_high:,.1f}" if not np.isnan(mv.fcfe_fair_low) else "—", ((mv.fcfe_intrinsic - p_val) / p_val * 100) if p_val > 0 else np.nan),
+            ("DDM", "Dividends", "Cost of Equity", f"{mv.terminal_growth_applied:.1%}", mv.ddm_value, "—", ((mv.ddm_value - p_val) / p_val * 100) if p_val > 0 and not np.isnan(mv.ddm_value) else np.nan),
+            ("Gordon Growth", "Next-period FCF", f"WACC {mv.wacc_applied:.1%}", f"{mv.terminal_growth_applied:.1%}", mv.gordon_value, "—", ((mv.gordon_value - p_val) / p_val * 100) if p_val > 0 and not np.isnan(mv.gordon_value) else np.nan),
+            ("Blended", "Multi-model Avg", f"WACC {mv.wacc_applied:.1%}", f"{mv.terminal_growth_applied:.1%}", mv.blended_intrinsic, f"{curr_sym}{mv.blended_fair_low:,.1f} – {curr_sym}{mv.blended_fair_high:,.1f}" if not np.isnan(mv.blended_fair_low) else "—", (mv.premium_to_price * 100) if not np.isnan(mv.premium_to_price) else np.nan),
+        ]
+        for name, cf_base, disc, tg, iv, band, up in models_data:
+            if not np.isnan(iv) and iv > 0:
+                up_str = f"{up:+.1f}%" if not np.isnan(up) else "—"
+                mm_rows_html += f"""
+                <tr>
+                  <td><b>{name}</b></td>
+                  <td>{cf_base}</td>
+                  <td>{disc}</td>
+                  <td>{tg}</td>
+                  <td><b>{curr_sym}{iv:,.2f}</b></td>
+                  <td>{band}</td>
+                  <td><b>{up_str}</b></td>
+                </tr>
+                """
+        mm_html = f"""
+<div class="section">
+  <h2>Multi-Model Valuation Summary Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Cash Flow Base</th>
+        <th>Discount Rate</th>
+        <th>Growth Rate</th>
+        <th>Intrinsic Value</th>
+        <th>Fair Value Band</th>
+        <th>Implied Upside</th>
+      </tr>
+    </thead>
+    <tbody>
+      {mm_rows_html}
+    </tbody>
+  </table>
+  <div style="font-size: 9pt; color: #64748B; margin-top: 6px;">
+    <b>Institutional Guardrails:</b> TV Contribution: {mv.tv_contribution_pct:.1%} (Capped ≤80%) &bull; Cross-Model Gap: {mv.cross_model_gap_pct:.1%} &bull; Confidence Score: {mv.confidence_score:.0%} &bull; Spread: {(mv.wacc_applied - mv.terminal_growth_applied):.1%}
+  </div>
+</div>
+"""
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -223,6 +275,8 @@ def build_html_report(report: EquityResearchReport) -> str:
   <div>{_escape(sections.valuation)}</div>
 </div>
 
+{mm_html}
+
 <div class="section">
   <h2>Risks, Catalysts & Scenarios</h2>
   <div>{_escape(sections.risks)}</div>
@@ -340,6 +394,66 @@ def export_equity_research_excel(report: EquityResearchReport) -> bytes:
             for c_idx, val in enumerate(s_row, start=1):
                 ws_val.write(row, c_idx, val, curr_fmt)
             row += 1
+
+    # Multi-Model Valuation Worksheet
+    if report.multi_valuation and report.multi_valuation.ok:
+        ws_mm = workbook.add_worksheet("Multi-Model Valuation")
+        ws_mm.set_column(0, 0, 20)
+        ws_mm.set_column(1, 5, 18)
+        ws_mm.merge_range("A1:F1", "Multi-Model Valuation Summary Matrix", title_fmt)
+
+        mv = report.multi_valuation
+        p_val = report.quote.get("price", np.nan)
+
+        mm_headers = ["Model", "Cash Flow Base", "Discount Rate", "Terminal Growth", "Intrinsic Value", "Implied Upside"]
+        for c_idx, h in enumerate(mm_headers):
+            ws_mm.write(2, c_idx, h, header_fmt)
+
+        mm_rows = []
+        if not np.isnan(mv.fcff_intrinsic):
+            fcff_up = (mv.fcff_intrinsic - p_val) / p_val if p_val and p_val > 0 else np.nan
+            mm_rows.append(("FCFF", "5-Year FCF + TV", f"WACC {mv.wacc_applied:.1%}", f"{mv.terminal_growth_applied:.1%}", mv.fcff_intrinsic, fcff_up))
+        if not np.isnan(mv.fcfe_intrinsic):
+            fcfe_up = (mv.fcfe_intrinsic - p_val) / p_val if p_val and p_val > 0 else np.nan
+            mm_rows.append(("FCFE", "Equity Cash Flow", "Cost of Equity", f"{mv.terminal_growth_applied:.1%}", mv.fcfe_intrinsic, fcfe_up))
+        if not np.isnan(mv.ddm_value):
+            ddm_up = (mv.ddm_value - p_val) / p_val if p_val and p_val > 0 else np.nan
+            mm_rows.append(("DDM", "Dividends", "Cost of Equity", f"{mv.terminal_growth_applied:.1%}", mv.ddm_value, ddm_up))
+        if not np.isnan(mv.gordon_value):
+            gordon_up = (mv.gordon_value - p_val) / p_val if p_val and p_val > 0 else np.nan
+            mm_rows.append(("Gordon Growth", "Next-period FCF", f"WACC {mv.wacc_applied:.1%}", f"{mv.terminal_growth_applied:.1%}", mv.gordon_value, gordon_up))
+        if not np.isnan(mv.blended_intrinsic):
+            mm_rows.append(("Blended", "Multi-model Avg", f"WACC {mv.wacc_applied:.1%}", f"{mv.terminal_growth_applied:.1%}", mv.blended_intrinsic, mv.premium_to_price))
+
+        r_mm = 3
+        for m_name, base_cf, disc_rate, tg_rate, iv, up in mm_rows:
+            ws_mm.write(r_mm, 0, m_name, label_fmt)
+            ws_mm.write(r_mm, 1, base_cf, text_fmt)
+            ws_mm.write(r_mm, 2, disc_rate, text_fmt)
+            ws_mm.write(r_mm, 3, tg_rate, text_fmt)
+            _safe_write(ws_mm, r_mm, 4, iv, curr_fmt, text_fmt)
+            _safe_write(ws_mm, r_mm, 5, up, pct_fmt, text_fmt)
+            r_mm += 1
+
+        # Institutional Validation Metrics in Excel
+        r_mm += 2
+        ws_mm.merge_range(f"A{r_mm+1}:D{r_mm+1}", "Institutional Validation & Guardrails", header_fmt)
+        r_mm += 1
+        val_metrics = [
+            ("Terminal Value Contribution %", mv.tv_contribution_pct, pct_fmt),
+            ("Cross-Model Gap %", mv.cross_model_gap_pct, pct_fmt),
+            ("Valuation Confidence Score", mv.confidence_score, pct_fmt),
+            ("WACC Applied", mv.wacc_applied, pct_fmt),
+            ("Terminal Growth Applied", mv.terminal_growth_applied, pct_fmt),
+            ("Assumptions Rejected & Recalculated", "Yes" if mv.assumptions_rejected else "No", text_fmt),
+        ]
+        for v_lbl, v_val, v_fmt in val_metrics:
+            ws_mm.write(r_mm, 0, v_lbl, label_fmt)
+            if isinstance(v_val, str):
+                ws_mm.write(r_mm, 1, v_val, v_fmt)
+            else:
+                _safe_write(ws_mm, r_mm, 1, v_val, v_fmt, text_fmt)
+            r_mm += 1
 
     # Tab 2: Fundamentals
     ws_fund = workbook.add_worksheet("Fundamentals")

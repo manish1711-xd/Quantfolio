@@ -347,8 +347,71 @@ def _build_peer_multiples_chart(peers_df: pd.DataFrame, target_ticker: str, targ
     return ch_theme.apply(fig)
 
 
-# ---------------------------------------------------------------------------
-# Main Page Render Function
+def _build_multi_model_comparison_chart(
+    multi_val: Any,  # MultiModelValuationResult
+    price: float,
+    curr_sym: str
+) -> go.Figure:
+    """Horizontal bar chart comparing FCFF, FCFE, DDM, Gordon Growth, and Blended valuation."""
+    fig = go.Figure()
+
+    # Collect model values
+    models = []
+    values = []
+    labels = []
+
+    if multi_val.fcff_intrinsic and not np.isnan(multi_val.fcff_intrinsic) and multi_val.fcff_intrinsic > 0:
+        models.append(("FCFF", multi_val.fcff_intrinsic, "#3B82F6"))
+    if multi_val.fcfe_intrinsic and not np.isnan(multi_val.fcfe_intrinsic) and multi_val.fcfe_intrinsic > 0:
+        models.append(("FCFE", multi_val.fcfe_intrinsic, "#10B981"))
+    if multi_val.ddm_value and not np.isnan(multi_val.ddm_value) and multi_val.ddm_value > 0:
+        models.append(("DDM", multi_val.ddm_value, "#F59E0B"))
+    if multi_val.gordon_value and not np.isnan(multi_val.gordon_value) and multi_val.gordon_value > 0:
+        models.append(("Gordon", multi_val.gordon_value, "#8B5CF6"))
+    if multi_val.blended_intrinsic and not np.isnan(multi_val.blended_intrinsic) and multi_val.blended_intrinsic > 0:
+        models.append(("Blended", multi_val.blended_intrinsic, "#059669"))
+
+    if not models:
+        return fig
+
+    models.sort(key=lambda x: x[1], reverse=True)  # Sort by value descending
+
+    for name, val, color in models:
+        labels.append(name)
+        values.append(val)
+
+    # Add current price reference line
+    if price and price > 0:
+        fig.add_vline(
+            x=price,
+            line_dash="dash",
+            line_color="#64748B",
+            annotation_text=f"CMP: {curr_sym}{price:,.0f}",
+            annotation_position="right",
+        )
+
+    fig.add_trace(
+        go.Bar(
+            y=labels,
+            x=values,
+            orientation="h",
+            marker_color=[c for _, _, c in models],
+            text=[f"{curr_sym}{v:,.0f}" for v in values],
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(
+        title=dict(text="Multi-Model Valuation Comparison (FCFF, FCFE, DDM, Gordon Growth, Blended)"),
+        xaxis_title="Intrinsic Value (Per Share)",
+        yaxis_title="Model",
+        yaxis=dict(autorange="reversed"),
+        margin=dict(l=10, r=10, t=40, b=10),
+        showlegend=False,
+    )
+    return ch_theme.apply(fig)
+
+
 # ---------------------------------------------------------------------------
 def render() -> None:
     """Render the Equity Research Report Generator Streamlit Dashboard."""
@@ -532,6 +595,7 @@ def render() -> None:
         valuation=valuation,
         peer_comparison=peer_results,
         news_items=news_items,
+        multi_valuation=multi_valuation,
     )
 
     full_report = EquityResearchReport(
@@ -543,6 +607,7 @@ def render() -> None:
         technical=technicals,
         valuation=valuation,
         peer_comparison=peer_results,
+        multi_valuation=multi_valuation,
     )
 
     curr = quote.get("currency", "INR")
@@ -863,6 +928,107 @@ def render() -> None:
             with st.expander("📋 Model Guardrail Audit Notices & Auto-Adjustments", expanded=bool(multi_valuation.assumptions_rejected or (not np.isnan(gap_pct) and gap_pct > 0.25))):
                 for notice in multi_valuation.notices:
                     st.caption(f"- {notice}")
+
+        # Multi-Model Valuation Comparison Matrix (Dedicated Section)
+        st.divider()
+        st.markdown("### 📊 Multi-Model Valuation Comparison Matrix")
+        st.caption("Side-by-side comparison of FCFF, FCFE, DDM, Gordon Growth, and Blended intrinsic values with cash flow bases, discount rates, growth rates, and fair value bands.")
+
+        if multi_valuation.ok:
+            # Build comparison dataframe for display
+            comparison_data = []
+            m = multi_valuation
+            price_val = price
+
+            # FCFF row
+            if m.fcff_intrinsic and not np.isnan(m.fcff_intrinsic):
+                fcff_up = (m.fcff_intrinsic - price_val) / price_val if price_val and price_val > 0 else np.nan
+                comparison_data.append({
+                    "Model": "FCFF",
+                    "Cash Flow Base": "5-Year FCF + TV",
+                    "Discount Rate": f"WACC {m.wacc_applied:.1%}",
+                    "Growth Rate": f"{m.terminal_growth_applied:.1%}",
+                    "Fair Value Low": f"{curr_sym}{m.fcff_fair_low:,.2f}" if not np.isnan(m.fcff_fair_low) else "—",
+                    "Fair Value High": f"{curr_sym}{m.fcff_fair_high:,.2f}" if not np.isnan(m.fcff_fair_high) else "—",
+                    "Implied Upside": f"{fcff_up:+.1%}" if not np.isnan(fcff_up) else "—",
+                })
+
+            # FCFE row
+            if m.fcfe_intrinsic and not np.isnan(m.fcfe_intrinsic):
+                fcfe_up = (m.fcfe_intrinsic - price_val) / price_val if price_val and price_val > 0 else np.nan
+                comparison_data.append({
+                    "Model": "FCFE",
+                    "Cash Flow Base": "Equity Cash Flow",
+                    "Discount Rate": "Cost of Equity",
+                    "Growth Rate": f"{m.terminal_growth_applied:.1%}",
+                    "Fair Value Low": f"{curr_sym}{m.fcfe_fair_low:,.2f}" if not np.isnan(m.fcfe_fair_low) else "—",
+                    "Fair Value High": f"{curr_sym}{m.fcfe_fair_high:,.2f}" if not np.isnan(m.fcfe_fair_high) else "—",
+                    "Implied Upside": f"{fcfe_up:+.1%}" if not np.isnan(fcfe_up) else "—",
+                })
+
+            # DDM row
+            if m.ddm_value and not np.isnan(m.ddm_value):
+                ddm_up = (m.ddm_value - price_val) / price_val if price_val and price_val > 0 else np.nan
+                comparison_data.append({
+                    "Model": "DDM",
+                    "Cash Flow Base": "Dividends",
+                    "Discount Rate": "Cost of Equity",
+                    "Growth Rate": f"{m.terminal_growth_applied:.1%}",
+                    "Fair Value Low": "—",
+                    "Fair Value High": "—",
+                    "Implied Upside": f"{ddm_up:+.1%}" if not np.isnan(ddm_up) else "—",
+                })
+
+            # Gordon Growth row
+            if m.gordon_value and not np.isnan(m.gordon_value):
+                gordon_up = (m.gordon_value - price_val) / price_val if price_val and price_val > 0 else np.nan
+                comparison_data.append({
+                    "Model": "Gordon Growth",
+                    "Cash Flow Base": "Next-period FCF",
+                    "Discount Rate": f"WACC {m.wacc_applied:.1%}",
+                    "Growth Rate": f"{m.terminal_growth_applied:.1%}",
+                    "Fair Value Low": "—",
+                    "Fair Value High": "—",
+                    "Implied Upside": f"{gordon_up:+.1%}" if not np.isnan(gordon_up) else "—",
+                })
+
+            # Blended row (always show)
+            if m.blended_intrinsic and not np.isnan(m.blended_intrinsic):
+                blended_up = m.premium_to_price
+                comparison_data.append({
+                    "Model": "Blended",
+                    "Cash Flow Base": "Multi-model Avg",
+                    "Discount Rate": f"WACC {m.wacc_applied:.1%}",
+                    "Growth Rate": f"{m.terminal_growth_applied:.1%}",
+                    "Fair Value Low": f"{curr_sym}{m.blended_fair_low:,.2f}" if not np.isnan(m.blended_fair_low) else "—",
+                    "Fair Value High": f"{curr_sym}{m.blended_fair_high:,.2f}" if not np.isnan(m.blended_fair_high) else "—",
+                    "Implied Upside": f"{blended_up:+.1%}" if not np.isnan(blended_up) else "—",
+                })
+
+            if comparison_data:
+                comp_df = pd.DataFrame(comparison_data)
+                ui.dataframe(comp_df, height=200)
+
+                # Horizontal comparison chart
+                st.markdown("**Valuation Comparison Chart**")
+                chart_fig = _build_multi_model_comparison_chart(multi_valuation, price, curr_sym)
+                if not chart_fig.empty:
+                    st.plotly_chart(chart_fig, use_container_width=True, height=300)
+                else:
+                    st.info("Insufficient data for comparison chart.")
+
+            # Validation Summary
+            st.markdown("**Institutional Validation Summary**")
+            val_cols = st.columns(4)
+            with val_cols[0]:
+                st.metric("TV Contribution %", f"{multi_valuation.tv_contribution_pct:.1%}" if not np.isnan(multi_valuation.tv_contribution_pct) else DASH, delta=None)
+            with val_cols[1]:
+                st.metric("Cross-Model Gap", f"{multi_valuation.cross_model_gap_pct:.1%}" if not np.isnan(multi_valuation.cross_model_gap_pct) else DASH)
+            with val_cols[2]:
+                conf = multi_valuation.confidence_score
+                st.metric("Confidence Score", f"{conf:.0%}" if not np.isnan(conf) else DASH)
+            with val_cols[3]:
+                st.metric("Assumptions Rejected", "Yes ⚠️" if multi_valuation.assumptions_rejected else "No ✅")
 
     # Tab 3: Fundamentals & Financial Statements
     with tabs[2]:

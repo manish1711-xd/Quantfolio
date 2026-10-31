@@ -179,3 +179,4 @@ class EquityResearchReport:
     technical: Optional[TechnicalData] = None
     valuation: Optional[ValuationResult] = None
     peer_comparison: Optional[PeerComparisonResult] = None
+    multi_valuation: Optional[MultiModelValuationResult] = None

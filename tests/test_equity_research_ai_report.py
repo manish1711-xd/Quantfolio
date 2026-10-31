@@ -106,3 +106,35 @@ def test_generate_report_sections_fallback(mock_components):
     assert len(sections.executive_summary) > 50
     assert len(sections.financial_analysis) > 50
     assert len(sections.valuation) > 50
+
+
+def test_build_template_sections_with_multi_valuation(mock_components):
+    from src.equity_research.models import MultiModelValuationResult
+    quote, fundamental, technical, valuation, peer_comp = mock_components
+    multi_val = MultiModelValuationResult(
+        fcff_value=2800.0,
+        fcff_intrinsic=2800.0,
+        fcff_fair_low=2380.0,
+        fcff_fair_high=3220.0,
+        fcfe_value=2750.0,
+        fcfe_intrinsic=2750.0,
+        fcfe_fair_low=2337.5,
+        fcfe_fair_high=3162.5,
+        ddm_value=2600.0,
+        gordon_value=2700.0,
+        blended_intrinsic=2712.5,
+        blended_fair_low=2380.0,
+        blended_fair_high=3220.0,
+        premium_to_price=0.085,
+        recommendation="Buy",
+        wacc_applied=0.10,
+        terminal_growth_applied=0.03,
+    )
+    sections = build_template_sections(
+        quote, fundamental, technical, valuation, peer_comp, multi_valuation=multi_val
+    )
+    assert "Multi-Model Valuation Comparison Matrix" in sections.valuation
+    assert "FCFF" in sections.valuation
+    assert "FCFE" in sections.valuation
+    assert "Gordon Growth" in sections.valuation
+    assert "Blended" in sections.valuation

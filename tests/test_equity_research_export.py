@@ -118,3 +118,41 @@ def test_export_equity_report_pdf(sample_report):
     pdf_bytes = export_equity_report_pdf(sample_report)
     assert isinstance(pdf_bytes, bytes)
     assert len(pdf_bytes) > 0
+
+
+def test_multi_model_valuation_export_integration(sample_report):
+    from src.equity_research.models import MultiModelValuationResult
+    sample_report.multi_valuation = MultiModelValuationResult(
+        fcff_value=2800.0,
+        fcff_intrinsic=2800.0,
+        fcff_fair_low=2400.0,
+        fcff_fair_high=3200.0,
+        fcfe_value=2750.0,
+        fcfe_intrinsic=2750.0,
+        fcfe_fair_low=2350.0,
+        fcfe_fair_high=3150.0,
+        ddm_value=2600.0,
+        gordon_value=2700.0,
+        blended_intrinsic=2712.5,
+        blended_fair_low=2400.0,
+        blended_fair_high=3200.0,
+        premium_to_price=0.085,
+        recommendation="Hold",
+        tv_contribution_pct=0.65,
+        cross_model_gap_pct=0.037,
+        confidence_score=0.92,
+        wacc_applied=0.10,
+        terminal_growth_applied=0.03,
+    )
+
+    # HTML contains Multi-Model summary
+    html = build_html_report(sample_report)
+    assert "Multi-Model Valuation Summary Matrix" in html
+    assert "FCFF" in html
+    assert "FCFE" in html
+    assert "Gordon Growth" in html
+
+    # Excel contains Multi-Model Valuation sheet
+    excel_bytes = export_equity_research_excel(sample_report)
+    assert isinstance(excel_bytes, bytes)
+    assert excel_bytes.startswith(b"PK")

@@ -18,6 +18,7 @@ from src.equity_research.models import (
     FundamentalData,
     TechnicalData,
     ValuationResult,
+    MultiModelValuationResult,
     PeerComparisonResult,
     AIReportSections,
 )
@@ -51,19 +52,21 @@ def build_template_sections(
     valuation: Optional[ValuationResult],
     peer_comparison: Optional[PeerComparisonResult],
     news_items: Optional[list[dict[str, Any]]] = None,
+    multi_valuation: Optional[MultiModelValuationResult] = None,
 ) -> AIReportSections:
     """Deterministic, institutional analyst report generator used when LLM is unavailable."""
     ticker = quote.get("ticker", "UNKNOWN")
     name = quote.get("name", ticker)
     price = quote.get("price")
     curr = quote.get("currency", "INR")
+    curr_sym = "₹" if curr == "INR" else "$" if curr == "USD" else f"{curr} "
     sector = quote.get("sector", "Unknown Sector")
     industry = quote.get("industry", "Unknown Industry")
     mcap = quote.get("market_cap")
 
     # 1. Executive Summary
-    rec = valuation.recommendation if valuation else "Insufficient data"
-    target_price = valuation.intrinsic_value if valuation else None
+    rec = multi_valuation.recommendation if multi_valuation and multi_valuation.ok else (valuation.recommendation if valuation else "Insufficient data")
+    target_price = multi_valuation.blended_intrinsic if multi_valuation and multi_valuation.ok else (valuation.intrinsic_value if valuation else None)
     upside_str = ""
     if target_price and price and price > 0:
         upside = (target_price - price) / price
@@ -128,6 +131,23 @@ Our quantitative assessment evaluates the business across historical profitabili
     if valuation and valuation.status_notes:
         dcf_notes = "\n*Model Notes:* " + "; ".join(valuation.status_notes)
 
+    # Multi-Model Valuation Summary Table
+    mm_table = ""
+    if multi_valuation and multi_valuation.ok:
+        mm_table = f"""
+**Multi-Model Valuation Comparison Matrix:**
+
+| Model | Cash Flow Base | Discount Rate | Growth Rate | Fair Value Range | Implied Upside vs CMP |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **FCFF** | 5-Year FCF + TV | WACC {multi_valuation.wacc_applied:.1%} | {multi_valuation.terminal_growth_applied:.1%} | {curr_sym}{multi_valuation.fcff_fair_low:,.1f} – {curr_sym}{multi_valuation.fcff_fair_high:,.1f} | {((multi_valuation.fcff_intrinsic - price) / price) * 100:+.1f}% |
+| **FCFE** | Equity Cash Flow | Cost of Equity | {multi_valuation.terminal_growth_applied:.1%} | {curr_sym}{multi_valuation.fcfe_fair_low:,.1f} – {multi_valuation.fcfe_fair_high:,.1f} | {((multi_valuation.fcfe_intrinsic - price) / price) * 100:+.1f}% |
+| **DDM** | Dividends | Cost of Equity | {multi_valuation.terminal_growth_applied:.1%} | — | — |
+| **Gordon Growth** | Next-period FCF | WACC {multi_valuation.wacc_applied:.1%} | {multi_valuation.terminal_growth_applied:.1%} | — | {((multi_valuation.gordon_value - price) / price) * 100:+.1f}% |
+| **Blended** | Multi-model Avg | WACC {multi_valuation.wacc_applied:.1%} | {multi_valuation.terminal_growth_applied:.1%} | {curr_sym}{multi_valuation.blended_fair_low:,.1f} – {multi_valuation.blended_fair_high:,.1f} | {((multi_valuation.blended_intrinsic - price) / price) * 100:+.1f}% |
+
+*Note: DDM fair values derived from dividend discounting. Values shown are model outputs.*
+"""
+
     val_section = f"""### Valuation & Multi-Model DCF / Intrinsic Pricing (FCFF, FCFE, DDM, Gordon Growth)
 
 **Methodology Reconciliation: Multi-Model Valuation Suite**
@@ -141,6 +161,8 @@ Our quantitative assessment evaluates the business across historical profitabili
 - **WACC Applied:** {_format_pct(valuation.wacc_used if valuation else None)} | **Terminal Growth Rate:** 3.0%
 - **Sensitivity Valuation Band:** Low {_format_curr(valuation.fair_value_low if valuation else None, curr)} – High {_format_curr(valuation.fair_value_high if valuation else None, curr)}
 {dcf_notes}
+
+{mm_table}
 
 **Relative Multiples (P/E & P/B vs Sector Peers):**
 - Target P/E: {_format_num(peer_comparison.target_multiples.get('pe_ratio') if peer_comparison else None)}x (Sector Avg: {_format_num(peer_comparison.sector_averages.get('pe_ratio') if peer_comparison else None)}x)
@@ -307,6 +329,7 @@ def generate_report_sections(
     valuation: Optional[ValuationResult],
     peer_comparison: Optional[PeerComparisonResult],
     news_items: Optional[list[dict[str, Any]]] = None,
+    multi_valuation: Optional[MultiModelValuationResult] = None,
     api_key: Optional[str] = None,
 ) -> AIReportSections:
     """Main entry point: generates report sections via LLM if available, otherwise template."""
@@ -315,7 +338,7 @@ def generate_report_sections(
 
     # Always generate the template as baseline or fallback
     template_sections = build_template_sections(
-        quote, fundamental, technical, valuation, peer_comparison, news_items
+        quote, fundamental, technical, valuation, peer_comparison, news_items, multi_valuation
     )
 
     if llm_output and len(llm_output) > 200:
