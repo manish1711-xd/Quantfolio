@@ -176,14 +176,23 @@ def apply_terminal_value_cap(
 
 
 def calculate_cross_model_gap(fcff_value: float, gordon_value: float) -> float:
-    """Calculate percentage gap between FCFF and Gordon Growth intrinsic values."""
-    if fcff_value is None or gordon_value is None or np.isnan(fcff_value) or np.isnan(gordon_value):
+    """Calculate percentage gap between FCFF and Gordon Growth intrinsic values.
+
+    Cleans data first: Both values must be positive non-NaN numbers.
+    If either value is invalid (None, NaN, or <= 0), returns np.nan.
+    """
+    # Clean data first: validate both inputs are valid positive numbers
+    if fcff_value is None or gordon_value is None:
         return np.nan
-    if fcff_value <= 0 and gordon_value <= 0:
+    if np.isnan(fcff_value) or np.isnan(gordon_value):
         return np.nan
+    if fcff_value <= 0 or gordon_value <= 0:
+        return np.nan
+
+    # Now both values are cleaned and positive - calculate the gap
     diff = abs(fcff_value - gordon_value)
-    gap_fcff = diff / fcff_value if fcff_value > 0 else 0.0
-    gap_gordon = diff / gordon_value if gordon_value > 0 else 0.0
+    gap_fcff = diff / fcff_value
+    gap_gordon = diff / gordon_value
     return float(max(gap_fcff, gap_gordon))
 
 

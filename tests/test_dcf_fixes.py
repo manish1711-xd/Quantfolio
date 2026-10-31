@@ -316,6 +316,34 @@ class TestCrossModelValidation:
         gap = calculate_cross_model_gap(fcff, gordon)
         assert abs(gap - 0.30) < 0.01  # 30% gap
 
+    def test_cross_model_gap_data_cleaning(self):
+        """Test data cleaning before cross-model gap calculation.
+
+        Both values must be valid positive numbers for gap calculation.
+        Invalid data should return np.nan.
+        """
+        from src.equity_research.dcf import calculate_cross_model_gap
+        import numpy as np
+
+        # Valid positive values should calculate gap
+        assert calculate_cross_model_gap(100.0, 130.0) == 0.30
+
+        # Zero or negative values should return np.nan (cleaned data)
+        assert np.isnan(calculate_cross_model_gap(0.0, 100.0))
+        assert np.isnan(calculate_cross_model_gap(100.0, 0.0))
+        assert np.isnan(calculate_cross_model_gap(-10.0, 100.0))
+        assert np.isnan(calculate_cross_model_gap(100.0, -10.0))
+        assert np.isnan(calculate_cross_model_gap(-10.0, -20.0))
+
+        # NaN values should return np.nan (cleaned data)
+        assert np.isnan(calculate_cross_model_gap(np.nan, 100.0))
+        assert np.isnan(calculate_cross_model_gap(100.0, np.nan))
+        assert np.isnan(calculate_cross_model_gap(np.nan, np.nan))
+
+        # None values should return np.nan (cleaned data)
+        assert np.isnan(calculate_cross_model_gap(None, 100.0))
+        assert np.isnan(calculate_cross_model_gap(100.0, None))
+
     def test_cross_model_gap_tiers(self):
         """Test cross-model gap tier classification."""
         from src.equity_research.dcf import classify_cross_model_gap
