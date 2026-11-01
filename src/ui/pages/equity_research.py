@@ -1012,7 +1012,7 @@ def render() -> None:
                 # Horizontal comparison chart
                 st.markdown("**Valuation Comparison Chart**")
                 chart_fig = _build_multi_model_comparison_chart(multi_valuation, price, curr_sym)
-                if not chart_fig.empty:
+                if chart_fig is not None and len(chart_fig.data) > 0:
                     st.plotly_chart(chart_fig, use_container_width=True, height=300)
                 else:
                     st.info("Insufficient data for comparison chart.")
