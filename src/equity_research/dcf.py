@@ -180,6 +180,9 @@ def calculate_cross_model_gap(fcff_value: float, gordon_value: float) -> float:
 
     Cleans data first: Both values must be positive non-NaN numbers.
     If either value is invalid (None, NaN, or <= 0), returns np.nan.
+
+    Uses relative gap = |diff| / max(FCFF, Gordon) for meaningful percentage
+    divergence between models.
     """
     # Clean data first: validate both inputs are valid positive numbers
     if fcff_value is None or gordon_value is None:
@@ -189,11 +192,10 @@ def calculate_cross_model_gap(fcff_value: float, gordon_value: float) -> float:
     if fcff_value <= 0 or gordon_value <= 0:
         return np.nan
 
-    # Now both values are cleaned and positive - calculate the gap
+    # Calculate gap relative to the larger value for meaningful percentage
     diff = abs(fcff_value - gordon_value)
-    gap_fcff = diff / fcff_value
-    gap_gordon = diff / gordon_value
-    return float(max(gap_fcff, gap_gordon))
+    max_value = max(fcff_value, gordon_value)
+    return float(diff / max_value)
 
 
 def classify_cross_model_gap(gap: float) -> str:
@@ -363,11 +365,16 @@ def calculate_multi_model_valuation(
     net_debt = valid_inputs.net_debt or 0.0
 
     # Build assumptions and financials for multi-model engine
+    rev_val = valid_inputs.revenue_latest if (valid_inputs.revenue_latest and not np.isnan(valid_inputs.revenue_latest) and valid_inputs.revenue_latest > 0) else fcffree * 7.0
+    ebitda_val = valid_inputs.ebitda if (valid_inputs.ebitda and not np.isnan(valid_inputs.ebitda) and valid_inputs.ebitda > 0) else fcffree * 1.5
+    op_margin_val = valid_inputs.operating_margin if (valid_inputs.operating_margin and not np.isnan(valid_inputs.operating_margin)) else 0.18
+
     financials_dict = {
-        "revenue_latest": fcffree,
+        "revenue_latest": rev_val,
         "net_debt": net_debt,
         "shares_outstanding": shares,
-        "ebitda": fcffree,
+        "ebitda": ebitda_val,
+        "operating_margin": op_margin_val,
         "current_price": current_price or np.nan,
         "pe_ratio": 15.0,
     }
@@ -376,8 +383,12 @@ def calculate_multi_model_valuation(
         financials_dict, wacc, growth_rate, term_g
     )
 
-    # Cost of Equity for FCFE and DDM
-    cost_of_equity = max(term_g + MIN_TERMINAL_SPREAD, wacc - 0.02)
+    # Cost of Equity for FCFE and DDM (CAPM: Rf + Beta * ERP, with strict institutional floor)
+    rf_rate = valid_inputs.risk_free_rate if (valid_inputs.risk_free_rate and not np.isnan(valid_inputs.risk_free_rate)) else 0.0705
+    beta_val = valid_inputs.beta if (valid_inputs.beta and not np.isnan(valid_inputs.beta)) else 1.0
+    erp_val = 0.060
+    ke_capm = rf_rate + beta_val * erp_val
+    cost_of_equity = max(ke_capm, wacc + 0.015, term_g + MIN_TERMINAL_SPREAD)
 
     # 1. FCFF Model with Terminal Value contribution guardrail (Requirement 6 & 7)
     years = valid_inputs.projection_years or 5
@@ -409,17 +420,31 @@ def calculate_multi_model_valuation(
     fcff_equity_val = max(0.0, adjusted_ev - net_debt)
     fcff_per_share = fcff_equity_val / shares if shares > 0 else np.nan
 
-    # 2. Run FCFE
+    # 2. Run FCFE (using company financial bridge or explicit cash flow bridge)
     fcfe_result = run_fcfe(assumptions, company_fin, cost_of_equity=cost_of_equity)
+    fcfe_per_share = fcfe_result.value_per_share if fcfe_result.ok and not np.isnan(fcfe_result.value_per_share) else np.nan
+    if np.isnan(fcfe_per_share) or fcfe_per_share <= 0:
+        # Robust fallback bridge for FCFE = FCFF - after_tax_interest
+        tax_rate = 0.2517
+        kd = 0.08
+        after_tax_int = max(0.0, net_debt) * kd * (1.0 - tax_rate)
+        fcfe_proj = [max(0.0, f - after_tax_int) for f in fcf_projected]
+        pv_fcfe_exp = sum(f / ((1.0 + cost_of_equity) ** idx) for idx, f in enumerate(fcfe_proj, start=1))
+        final_fcfe_val = fcfe_proj[-1] if fcfe_proj else fcffree * 0.8
+        tv_fcfe_val = compute_terminal_value(final_fcfe_val, cost_of_equity, term_g)
+        pv_tv_fcfe = tv_fcfe_val / ((1.0 + cost_of_equity) ** years) if not np.isnan(tv_fcfe_val) else 0.0
+        ev_fcfe_val = pv_fcfe_exp + pv_tv_fcfe
+        fcfe_per_share = ev_fcfe_val / shares if shares > 0 else np.nan
 
     # 3. Run DDM
-    dividend = dividend_per_share if dividend_per_share is not None else (company_fin.base_revenue / company_fin.shares * 0.3)
+    div_val = valid_inputs.dividend_per_share if (valid_inputs.dividend_per_share and not np.isnan(valid_inputs.dividend_per_share) and valid_inputs.dividend_per_share > 0) else (dividend_per_share if dividend_per_share is not None and dividend_per_share > 0 else np.nan)
     ddm_result = run_ddm(
-        current_dividend=dividend,
+        current_dividend=div_val if not np.isnan(div_val) else 0.0,
         growth_rate=term_g,
         cost_of_equity=cost_of_equity,
         current_price=current_price or np.nan,
     )
+    ddm_per_share = ddm_result.value_per_share if ddm_result.ok else np.nan
 
     # 4. Run Gordon Growth Model (Requirement 7)
     next_fcf = fcffree * (1.0 + growth_rate)
@@ -432,6 +457,13 @@ def calculate_multi_model_valuation(
     if _ok(gordon_ev) and shares > 0:
         gordon_equity = max(0.0, gordon_ev - net_debt)
         gordon_per_share = gordon_equity / shares
+
+    # Detailed debugging log (Institutional Audit Trail)
+    logger.info(
+        "DCF Valuation Audit | Revenue Growth: %.2f%% | FCF Growth: %.2f%% | WACC: %.2f%% | Cost of Equity: %.2f%% | Terminal Growth: %.2f%% | Enterprise Value: %%,.0f | Equity Value: %,.0f | Fair Value Per Share: %.2f",
+        growth_rate * 100, growth_rate * 100, wacc * 100, cost_of_equity * 100, term_g * 100,
+        adjusted_ev, fcff_equity_val, fcff_per_share
+    )
 
     # 5. Sanity Check Cross-Model Difference between FCFF and Gordon Growth (Requirement 8)
     cross_gap = calculate_cross_model_gap(fcff_per_share, gordon_per_share)
@@ -451,7 +483,6 @@ def calculate_multi_model_valuation(
         notices.append(
             f"🛑 Rejected assumptions: Cross-model difference of {cross_gap:.1%} exceeds 75% tolerance. Recalculating using conservative defaults (WACC={DEFAULT_CONSERVATIVE_WACC:.1%}, Terminal Growth={DEFAULT_CONSERVATIVE_TERMINAL_GROWTH:.1%})."
         )
-        # Recalculate using conservative defaults (Requirement 8 & 10)
         conservative_inputs = valid_inputs.copy_with(
             wacc=DEFAULT_CONSERVATIVE_WACC,
             terminal_growth_rate=DEFAULT_CONSERVATIVE_TERMINAL_GROWTH,
@@ -481,7 +512,7 @@ def calculate_multi_model_valuation(
             intrinsic_values=recalculated_result.intrinsic_values,
             model_names=recalculated_result.model_names,
             recommendation=recalculated_result.recommendation,
-            current_price=current_price or np.nan,
+            current_price=recalculated_result.current_price,
             notices=merged_notices,
             tv_contribution_pct=recalculated_result.tv_contribution_pct,
             cross_model_gap_pct=recalculated_result.cross_model_gap_pct,
@@ -491,40 +522,49 @@ def calculate_multi_model_valuation(
             assumptions_rejected=True,
         )
 
-    # Collect usable model values for blended intrinsic value
+    # Dynamic Reliability Weighting (FCFF 50%, FCFE 20%, DDM 10%, Gordon 20%)
     intrinsic_values: dict[str, float] = {}
     model_names: list[str] = []
+    models_dict = {}
 
     if _ok(fcff_per_share) and fcff_per_share > 0:
-        intrinsic_values["FCFF"] = fcff_per_share
-        model_names.append("FCFF")
-    if fcfe_result.ok and not np.isnan(fcfe_result.value_per_share):
-        intrinsic_values["FCFE"] = fcfe_result.value_per_share
-        model_names.append("FCFE")
-    if ddm_result.ok and not np.isnan(ddm_result.value_per_share):
-        intrinsic_values["DDM"] = ddm_result.value_per_share
-        model_names.append("DDM")
+        r_fcff = 1.0 if tv_contribution <= 0.80 else 0.8
+        models_dict["FCFF"] = (fcff_per_share, 0.50, r_fcff)
+
+    if _ok(fcfe_per_share) and fcfe_per_share > 0:
+        r_fcfe = 1.0 if (fcfe_per_share > 0.2 * fcff_per_share and fcfe_per_share < 3.0 * fcff_per_share) else 0.4
+        models_dict["FCFE"] = (fcfe_per_share, 0.20, r_fcfe)
+
+    if _ok(ddm_per_share) and ddm_per_share > 0 and div_val and not np.isnan(div_val) and div_val > 0:
+        r_ddm = 1.0 if (current_price and div_val / current_price >= 0.0075) else 0.2
+        models_dict["DDM"] = (ddm_per_share, 0.10, r_ddm)
+
     if _ok(gordon_per_share) and gordon_per_share > 0:
-        intrinsic_values["Gordon Growth"] = gordon_per_share
-        model_names.append("Gordon Growth")
+        r_gordon = 1.0 if (cross_gap <= 0.50) else 0.5
+        models_dict["Gordon Growth"] = (gordon_per_share, 0.20, r_gordon)
 
-    valid_values = list(intrinsic_values.values())
-    blended_intrinsic = float(np.mean(valid_values)) if valid_values else np.nan
-    blended_fair_low = fcff_per_share * 0.85 if _ok(fcff_per_share) else np.nan
-    blended_fair_high = fcff_per_share * 1.15 if _ok(fcff_per_share) else np.nan
+    total_effective_weight = sum(base_w * rel for _, base_w, rel in models_dict.values())
+    if total_effective_weight > 0:
+        blended_intrinsic = sum(val * base_w * rel for val, base_w, rel in models_dict.values()) / total_effective_weight
+        model_names = list(models_dict.keys())
+        intrinsic_values = {name: val for name, (val, _, _) in models_dict.items()}
+    else:
+        blended_intrinsic = fcff_per_share if _ok(fcff_per_share) else np.nan
+        model_names = ["FCFF"] if _ok(fcff_per_share) else []
+        intrinsic_values = {"FCFF": fcff_per_share} if _ok(fcff_per_share) else {}
 
-    # Implied premium / upside
+    blended_fair_low = blended_intrinsic * 0.85 if _ok(blended_intrinsic) else np.nan
+    blended_fair_high = blended_intrinsic * 1.15 if _ok(blended_intrinsic) else np.nan
+
     premium = np.nan
     if current_price and current_price > 0 and not np.isnan(blended_intrinsic):
         premium = (blended_intrinsic - current_price) / current_price
 
-    # Requirement 11: If upside > 200%, flag as 'Potentially Unrealistic Assumptions'
     if not np.isnan(premium) and premium > UNREALISTIC_UPSIDE_THRESHOLD:
         notices.append(
             f"⚠️ Potentially Unrealistic Assumptions: Implied upside of {premium:.1%} exceeds 200% threshold. Verify growth and cash flow estimates."
         )
 
-    # Recommendation
     recommendation = "Hold"
     if not np.isnan(blended_intrinsic) and blended_intrinsic > 0:
         if current_price and current_price > 0:
@@ -535,7 +575,6 @@ def calculate_multi_model_valuation(
             else:
                 recommendation = "Hold"
 
-    # Valuation Confidence Score (Requirement 9)
     confidence = calculate_valuation_confidence(
         wacc=wacc,
         terminal_growth=term_g,
@@ -543,6 +582,28 @@ def calculate_multi_model_valuation(
         cross_model_gap=cross_gap if not np.isnan(cross_gap) else 0.0,
         upside=premium if not np.isnan(premium) else 0.0,
     )
+
+    # Collect usable model values for blended intrinsic value (Requirement 4 & 7)
+    intrinsic_values: dict[str, float] = {}
+    model_names: list[str] = []
+
+    if _ok(fcff_per_share) and fcff_per_share > 0:
+        intrinsic_values["FCFF"] = fcff_per_share
+        model_names.append("FCFF")
+    if _ok(fcfe_per_share) and fcfe_per_share > 0:
+        intrinsic_values["FCFE"] = fcfe_per_share
+        model_names.append("FCFE")
+    if _ok(ddm_per_share) and ddm_per_share > 0:
+        intrinsic_values["DDM"] = ddm_per_share
+        model_names.append("DDM")
+    if _ok(gordon_per_share) and gordon_per_share > 0:
+        intrinsic_values["Gordon Growth"] = gordon_per_share
+        model_names.append("Gordon Growth")
+
+    valid_values = list(intrinsic_values.values())
+    blended_intrinsic = float(np.mean(valid_values)) if valid_values else np.nan
+    blended_fair_low = blended_intrinsic * 0.85 if _ok(blended_intrinsic) else np.nan
+    blended_fair_high = blended_intrinsic * 1.15 if _ok(blended_intrinsic) else np.nan
 
     return MultiModelValuationResult(
         fcff_value=fcff_per_share,

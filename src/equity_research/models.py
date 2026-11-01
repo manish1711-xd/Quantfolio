@@ -67,6 +67,13 @@ class DCFInputs:
     shares_outstanding: Optional[float] = None
     net_debt: float = 0.0
     projection_years: int = 5
+    revenue_latest: Optional[float] = None
+    ebitda: Optional[float] = None
+    operating_margin: Optional[float] = None
+    beta: Optional[float] = None
+    risk_free_rate: Optional[float] = None
+    dividend_per_share: Optional[float] = None
+    market_cap: Optional[float] = None
 
     def copy_with(self, **kwargs) -> DCFInputs:
         import dataclasses
